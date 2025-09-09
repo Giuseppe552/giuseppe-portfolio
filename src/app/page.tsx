@@ -29,6 +29,7 @@ export default function Portfolio() {
     () => [
       { id: "about", label: lang === "EN" ? "About" : "Chi Sono" },
       { id: "work", label: lang === "EN" ? "Work" : "Progetti" },
+      { id: "projects", label: lang === "EN" ? "Projects" : "Progetti" },
       { id: "contact", label: lang === "EN" ? "Contact" : "Contatti" },
     ],
     [lang]
@@ -57,9 +58,15 @@ export default function Portfolio() {
           <a href="#top" className="font-mono text-emerald-400">giuseppegiona.com</a>
           <nav className="hidden md:flex gap-6 text-sm">
             {nav.map((item) => (
-              <a key={item.id} href={`#${item.id}`} className="text-zinc-300 hover:text-white transition-colors">
-                {item.label}
-              </a>
+              item.id === "projects" ? (
+                <a key={item.id} href="/projects" className="text-zinc-300 hover:text-white transition-colors">
+                  {item.label}
+                </a>
+              ) : (
+                <a key={item.id} href={`#${item.id}`} className="text-zinc-300 hover:text-white transition-colors">
+                  {item.label}
+                </a>
+              )
             ))}
           </nav>
           <div className="flex items-center gap-3">
@@ -83,7 +90,7 @@ export default function Portfolio() {
             <p className="font-mono text-emerald-400">
               {lang === "EN" ? "Builder • Systems • Security" : "Costruttore • Sistemi • Sicurezza"}
             </p>
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mt-2">Giuseppe Giona</h1>
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mt-2">Giuseppe</h1>
             <Typewriter
               text={
                 lang === "EN"
@@ -96,9 +103,17 @@ export default function Portfolio() {
                 href="mailto:contact.giuseppe00@gmail.com"
                 label={lang === "EN" ? "Email me" : "Scrivimi"}
               />
+              <a
+                href="https://calendly.com/contact-giuseppe00/call"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-emerald-500 text-black font-semibold px-6 py-2 rounded-xl shadow hover:bg-emerald-400 transition"
+              >
+                Book a Call
+              </a>
               <GhostCTA
-                href="https://github.com/Giuseppe552"
-                label={lang === "EN" ? "See GitHub projects" : "Vedi progetti su GitHub"}
+                href="/projects"
+                label={lang === "EN" ? "See Projects" : "Vedi progetti"}
               />
             </div>
           </motion.div>
@@ -166,6 +181,26 @@ export default function Portfolio() {
               tags={["Python", "Flask", "React", "NLP"]}
               href="https://github.com/Giuseppe552/jobmate-ai"
             />
+            <ProjectCard
+              title="Secure Messaging CLI"
+              desc={
+                lang === "EN"
+                  ? "End-to-end encrypted messaging CLI in Python. Simple, secure, and privacy-focused."
+                  : "CLI di messaggistica cifrata end-to-end in Python. Semplice, sicuro, privacy al centro."
+              }
+              tags={["Python", "Encryption", "CLI"]}
+              href="https://github.com/Giuseppe552/secure-messaging-cli"
+            />
+            <ProjectCard
+              title="Zenith EV Trend Analyzer"
+              desc={
+                lang === "EN"
+                  ? "Automating UK EV fleet data to reveal electrification trends and leasing risks."
+                  : "Automazione dati flotte EV UK per trend e rischi di leasing."
+              }
+              tags={["Python", "Data", "EV", "Automation"]}
+              href="https://github.com/Giuseppe552/zenith-ev-trend-analyzer"
+            />
           </div>
         </div>
       </section>
@@ -196,6 +231,7 @@ export default function Portfolio() {
               <div className="mt-4 flex flex-wrap gap-3">
                 <PrimaryCTA href="mailto:contact.giuseppe00@gmail.com?subject=Hello" label={lang === "EN" ? "Email me" : "Scrivimi"} />
                 <GhostCTA href="https://github.com/Giuseppe552" label={lang === "EN" ? "See GitHub projects" : "Vedi progetti su GitHub"} />
+              <GhostCTA href="/projects" label={lang === "EN" ? "See Projects" : "Vedi progetti"} />
               </div>
             </div>
           </div>
