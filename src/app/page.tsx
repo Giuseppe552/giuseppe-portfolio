@@ -70,7 +70,7 @@ export default function Portfolio() {
                 aria-label="Play pronunciation"
                 className="bg-slate-900 text-indigo-400 rounded-full p-2 hover:bg-indigo-500 hover:text-white transition"
                 onClick={() => {
-                  const audio = new Audio('/giuseppe-pronunciation.mp3');
+                  const audio = new Audio('/giuseppe-pronunciation.m4a');
                   audio.play();
                 }}
               >
