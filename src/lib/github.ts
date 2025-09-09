@@ -1,3 +1,9 @@
+// Utility: Convert repo name to Title Case (e.g., network-scanner -> Network Scanner)
+export function repoTitle(name: string): string {
+  return name
+    .replace(/[-_]/g, ' ') // Replace - and _ with space
+    .replace(/\b\w/g, c => c.toUpperCase()); // Capitalize each word
+}
 
 
 export type GHRepo = {
