@@ -103,7 +103,7 @@ export default async function ProjectsPage() {
             </div>
             <div className="rounded-2xl border border-zinc-800 bg-zinc-800 p-6">
               <p className="text-zinc-300 mb-4">
-                For collaborations or ideas—send context and your ideal outcome. I reply when there's a clear problem and tight scope.
+                Got an idea or want to collaborate? Just send a quick message with what you're thinking—I'm always happy to chat and help out. Let's make something cool together!
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <a href="mailto:contact.giuseppe00@gmail.com?subject=Hello" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-500 text-white font-medium shadow hover:bg-indigo-400 transition">Email me</a>

@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { motion } from "framer-motion";
 import { GHRepo, repoTitle } from "@/lib/github";
 
 export type ProjectCardData = {
@@ -15,7 +16,7 @@ export type ProjectCardData = {
 };
 
 export default function ProjectsGrid({ cards }: { cards: ProjectCardData[] }) {
-  const { motion } = require("framer-motion");
+  // ...existing code...
   // Sort: projects with images first, then without
   // Patch Ghost Protocol, JobmateAI, and Network Scanner demoImg
   const patchedCards = cards.map(card => {

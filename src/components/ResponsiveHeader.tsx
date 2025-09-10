@@ -18,12 +18,14 @@ export default function ResponsiveHeader() {
         </button>
         <nav className="hidden md:flex gap-6 text-sm items-center font-mono">
           <a href="/projects" className="hover:text-indigo-400 transition">Projects</a>
+          <a href="/blog" className="hover:text-indigo-400 transition">Blog</a>
         </nav>
       </div>
       {open && (
         <nav className="absolute right-4 top-16 bg-slate-900 border border-slate-800 rounded-xl shadow-lg p-4 flex flex-col gap-4 font-mono text-lg md:hidden">
           <a href="/" className="hover:text-indigo-400 transition">Home</a>
           <a href="/projects" className="hover:text-indigo-400 transition">Projects</a>
+          <a href="/blog" className="hover:text-indigo-400 transition">Blog</a>
         </nav>
       )}
     </header>
