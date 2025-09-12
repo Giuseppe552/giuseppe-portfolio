@@ -304,7 +304,7 @@ function SectionTitle({ kicker, title }: { kicker: string; title: string }) {
   );
 }
 
-function ValueCard({ Icon, title, desc }: { Icon: React.ComponentType<{size?: number}> ; title: string; desc: string }) {
+function ValueCard({ Icon, title, desc }: { Icon: React.ComponentType<{size?: number; className?: string}> ; title: string; desc: string }) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.35)] hover:shadow-[0_30px_90px_-28px_rgba(79,70,229,0.18)] hover:border-indigo-500/40 transition-shadow">
       <div className="flex items-center gap-3">

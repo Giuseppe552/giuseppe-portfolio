@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import React from "react";
+import Link from "next/link";
 import { GHRepo, getPortfolioRepos } from "@/lib/github";
 import ReactMarkdown from "react-markdown";
 
@@ -10,8 +11,7 @@ export const metadata = {
 async function fetchReadme(repo: string): Promise<string | null> {
   const url = `https://raw.githubusercontent.com/Giuseppe552/${repo}/main/README.md`;
   try {
-    // @ts-ignore: next property is supported in Next.js 14+ for ISR
-    const res = await fetch(url, { next: { revalidate: 21600 } } as any);
+    const res = await fetch(url, { next: { revalidate: 21600 } });
     if (!res.ok) return null;
     return await res.text();
   } catch {
@@ -19,7 +19,8 @@ async function fetchReadme(repo: string): Promise<string | null> {
   }
 }
 
-export default async function ProjectDetailPage({ params }: { params: { repo: string } }) {
+export default async function ProjectDetailPage(props: { params: Promise<{ repo: string }> }) {
+  const params = await props.params;
   const repos: GHRepo[] = await getPortfolioRepos();
   const repo = repos.find(r => r.name === params.repo);
   if (!repo) return notFound();
@@ -32,7 +33,7 @@ export default async function ProjectDetailPage({ params }: { params: { repo: st
   });
 
   // Summarize README: remove emojis, extract first paragraph, language, and effect
-  function summarizeReadme(md: string): { summary: string, languages: string[], effect: string, image?: string } {
+  function summarizeReadme(md: string, repoData: GHRepo): { summary: string, languages: string[], effect: string, image?: string } {
     // Remove emojis
     md = md.replace(/:[^:]+:/g, "");
     md = md.replace(/\p{Emoji}/gu, "");
@@ -41,7 +42,7 @@ export default async function ProjectDetailPage({ params }: { params: { repo: st
     const summary = summaryMatch ? summaryMatch[1].trim() : "No summary available.";
     // Guess languages from code blocks and repo.language
     const langSet = new Set<string>();
-    if (repo?.language) langSet.add(repo.language);
+    if (repoData?.language) langSet.add(repoData.language);
     md.replace(/```(\w+)/g, (_, l) => { langSet.add(l); return ""; });
     // Try to extract effect/impact from README (look for 'effect', 'impact', 'result', 'outcome')
     const effectMatch = md.match(/(?:effect|impact|result|outcome)[^\n]*[:\-]?\s*([^\n]+)/i);
@@ -56,15 +57,15 @@ export default async function ProjectDetailPage({ params }: { params: { repo: st
     }
     // If image is relative, convert to raw GitHub URL
     if (image && !/^https?:\/\//.test(image)) {
-      image = `https://raw.githubusercontent.com/Giuseppe552/${repo.name}/main/${image.replace(/^\/?/,"")}`;
+      image = `https://raw.githubusercontent.com/Giuseppe552/${repoData.name}/main/${image.replace(/^\/?/,"")}`;
     }
     return { summary, languages: Array.from(langSet), effect, image };
   }
-  const { summary, languages, effect, image } = summarizeReadme(readme);
+  const { summary, languages, effect, image } = summarizeReadme(readme, repo);
   return (
     <main className="min-h-screen bg-black text-zinc-100 py-16">
       <div className="mx-auto max-w-3xl px-4">
-        <a href="/projects" className="text-indigo-400 underline mb-6 inline-block">← Back to projects</a>
+        <Link href="/projects" className="text-indigo-400 underline mb-6 inline-block">← Back to projects</Link>
         <h1 className="text-2xl font-bold mb-4">{repo.name}</h1>
         <div className="border border-neutral-800 bg-zinc-900 rounded-2xl p-6 mb-24 shadow-lg">
           {image && (

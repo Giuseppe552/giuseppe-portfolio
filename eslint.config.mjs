@@ -27,7 +27,6 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
-      "src/app/page.backup.tsx",
     ],
   },
 ];

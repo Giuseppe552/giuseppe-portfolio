@@ -24,14 +24,13 @@ export async function getPortfolioRepos(): Promise<GHRepo[]> {
   if (process?.env?.GITHUB_TOKEN) {
     headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
   }
-  // @ts-ignore: next property is supported in Next.js 14+ for ISR
   const res = await fetch(API_URL, {
     headers,
     next: { revalidate: 21600 },
-  } as any);
+  });
   if (!res.ok) return [];
   const data = await res.json();
-  return (data as any[])
+  return (data as GHRepo[])
     .filter(repo => repo.topics?.includes('portfolio'))
     .sort((a, b) => b.stargazers_count - a.stargazers_count)
     .map(repo => ({
