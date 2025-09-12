@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Diagnostic files
+build-diagnose.log
+
+# Audit reports (except committed examples)
+reports/*.txt
+reports/*.json
+reports/*.sarif
+!reports/.gitkeep
