@@ -9,7 +9,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     env:
-      ENFORCE_LINT: 'false'
+      ENFORCE_LINT: ${{ github.ref_name == 'copilot/fix-37bc4019-5708-4fb2-b5c2-a1c4bb6955e7' && 'true' || 'false' }}
     permissions:
       contents: read
       pull-requests: write

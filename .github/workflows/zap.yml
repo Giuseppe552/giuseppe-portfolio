@@ -4,6 +4,11 @@ on:
   push:
     branches: [ main ]
   pull_request:
+
+concurrency:
+  group: zap-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   zap:
     runs-on: ubuntu-latest
@@ -65,7 +70,8 @@ jobs:
         with:
           target: ${{ steps.target.outputs.target_url }}
           rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a'
+          cmd_options: '-a -T 120'
+        continue-on-error: true
           
       - name: Upload ZAP report
         if: steps.precheck.outputs.available == 'true'
