@@ -34,8 +34,8 @@ export default function LeadCaptureModal() {
       if (!res.ok) throw new Error(await res.text());
       setOk(true);
       localStorage.setItem("lead_modal_dismissed", "1");
-    } catch (err: any) {
-      setError(err?.message ?? "Something went wrong");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setSubmitting(false);
     }

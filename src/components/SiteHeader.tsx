@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export default function SiteHeader() {
@@ -8,12 +9,12 @@ export default function SiteHeader() {
       <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
         <a href="#top" className="font-mono text-indigo-400">giuseppegiona.com</a>
         <nav className="hidden md:flex gap-6 text-sm items-center">
-          <a href="/projects" className="text-zinc-300 hover:text-white transition-colors flex items-center gap-2">
+          <Link href="/projects" className="text-zinc-300 hover:text-white transition-colors flex items-center gap-2">
             Projects
             <span className="inline-block">
               <ArrowRight size={18} color="white" />
             </span>
-          </a>
+          </Link>
           <a href="#contact" className="text-zinc-300 hover:text-white transition-colors">Contact</a>
           <a
             href="https://calendly.com/giuseppegiona/30min"
