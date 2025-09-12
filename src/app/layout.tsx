@@ -28,7 +28,6 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
-  themeColor: "#0EA5E9",
 };
 
 export const viewport: Viewport = {
