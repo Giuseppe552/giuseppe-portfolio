@@ -1,26 +1,23 @@
-import fs from "fs";
-import path from "path";
 import matter from "gray-matter";
 import React from "react";
 import Link from "next/link";
 import ResponsiveHeader from "@/components/ResponsiveHeader";
 import BackgroundFX from "@/components/BackgroundFX";
 import SiteFooter from "@/components/SiteFooter";
+import { readBlogFile, listBlogSlugs } from "@/lib/safeFs";
 
 export const metadata = {
   title: "Blog – Giuseppe Giona",
 };
 
 function getBlogPosts() {
-  const blogDir = path.join(process.cwd(), "src/app/blog");
-  const files = fs.readdirSync(blogDir).filter(f => f.endsWith(".md"));
-  return files.map(filename => {
-    const filePath = path.join(blogDir, filename);
-    const raw = fs.readFileSync(filePath, "utf-8");
+  const slugs = listBlogSlugs();
+  return slugs.map(slug => {
+    const raw = readBlogFile(slug);
     const { data, content } = matter(raw);
     return {
-      slug: filename.replace(/\.md$/, ""),
-      title: data.title || filename.replace(/\.md$/, ""),
+      slug,
+      title: data.title || slug,
       date:
         typeof data.date === "object" && data.date instanceof Date
           ? data.date.toISOString().slice(0, 10)

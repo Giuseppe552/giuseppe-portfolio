@@ -12,6 +12,16 @@ export const metadata = {
 
 const GITHUB_USER = 'Giuseppe552';
 
+function isGithubRepoUrl(input: string): boolean {
+  try {
+    const u = new URL(input);
+    if (!(u.protocol === "http:" || u.protocol === "https:")) return false;
+    if (u.hostname !== "github.com") return false;
+    const parts = u.pathname.split("/").filter(Boolean);
+    return parts.length >= 2 && /^[A-Za-z0-9_.-]+$/.test(parts[0]) && /^[A-Za-z0-9_.-]+$/.test(parts[1]);
+  } catch { return false; }
+}
+
 export default async function ProjectsPage() {
   let repos: GHRepo[] = [];
   try {
@@ -30,7 +40,12 @@ export default async function ProjectsPage() {
           summary = readme
             .replace(/[#*_`>\-]/g, '') // remove markdown
             .replace(/:[^\s]+:/g, '') // remove emoji shortcodes
-            .replace(/[\u{1F600}-\u{1F6FF}]/gu, '') // remove unicode emojis
+            .split('')
+            .filter(char => {
+              const code = char.codePointAt(0);
+              return !code || code < 0x1F600 || code > 0x1F6FF; // filter emoji range safely
+            })
+            .join('')
             .split('\n')
             .map(line => line.trim())
             .filter(line => line.length > 0)

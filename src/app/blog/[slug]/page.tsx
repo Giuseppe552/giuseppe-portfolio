@@ -1,6 +1,4 @@
 "use server";
-import fs from "fs";
-import path from "path";
 import matter from "gray-matter";
 import React from "react";
 import Link from "next/link";
@@ -9,19 +7,15 @@ import remarkGfm from "remark-gfm";
 import ResponsiveHeader from "@/components/ResponsiveHeader";
 import BackgroundFX from "@/components/BackgroundFX";
 import SiteFooter from "@/components/SiteFooter";
+import { readBlogFile, listBlogSlugs } from "@/lib/safeFs";
 
 export async function generateStaticParams() {
-  const blogDir = path.join(process.cwd(), "src/app/blog");
-  const files = fs.readdirSync(blogDir).filter(f => f.endsWith(".md"));
-  return files.map(filename => ({ slug: filename.replace(/\.md$/, "") }));
+  return listBlogSlugs().map(slug => ({ slug }));
 }
 
-  const blogDir = path.join(process.cwd(), "src/app/blog");
 export default async function BlogPostPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
-  const blogDir = path.join(process.cwd(), "src/app/blog");
-  const filePath = path.join(blogDir, `${params.slug}.md`);
-  const raw = fs.readFileSync(filePath, "utf-8");
+  const raw = readBlogFile(params.slug);
   const { data, content } = matter(raw);
   return (
     <div
@@ -39,7 +33,7 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  h2: ({node, ...props}) => (
+                  h2: (props) => (
                     <h2
                       className="text-xl font-bold underline mb-6 mt-10 text-indigo-300"
                       style={{ fontFamily: 'JetBrains Mono, monospace' }}
@@ -49,16 +43,16 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                   hr: () => (
                     <div className="my-8" />
                   ),
-                  ul: ({node, ...props}) => (
+                  ul: (props) => (
                     <ul className="list-disc pl-6 mb-6" style={{ fontFamily: 'JetBrains Mono, monospace' }} {...props} />
                   ),
-                  ol: ({node, ...props}) => (
+                  ol: (props) => (
                     <ol className="list-decimal pl-6 mb-6" style={{ fontFamily: 'JetBrains Mono, monospace' }} {...props} />
                   ),
-                  li: ({node, ...props}) => (
+                  li: (props) => (
                     <li className="mb-2" style={{ fontFamily: 'JetBrains Mono, monospace' }} {...props} />
                   ),
-                  a: ({node, ...props}) => (
+                  a: (props) => (
                     <a
                       {...props}
                       className={
