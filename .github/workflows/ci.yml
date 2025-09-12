@@ -1,0 +1,68 @@
+name: ci
+on:
+  push: { branches: [ main ] }
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - name: Lint
+        run: npm run lint:security 2>&1 | tee lint.log
+        continue-on-error: true
+      - name: Typecheck
+        run: npm run typecheck 2>&1 | tee typecheck.log
+        continue-on-error: true
+      - name: Build
+        run: npm run build:ci 2>&1 | tee build.log
+        continue-on-error: true
+      - name: Audit (prod, high+)
+        run: npm audit --production --audit-level=high 2>&1 | tee audit.log || true
+      - name: Depcheck (unused/missing deps)
+        run: npx depcheck 2>&1 | tee depcheck.log || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ci-logs
+          path: |
+            lint.log
+            typecheck.log
+            build.log
+            audit.log
+            depcheck.log
+      - name: Summarize and comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const core = require('@actions/core');
+            const fs = require('fs');
+            function snip(p){ try { return '```\n'+fs.readFileSync(p,'utf8').slice(0,4000)+'\n```'; } catch { return 'n/a'; } }
+            const body = [
+              '### CI summary',
+              '**Lint:**', snip('lint.log'),
+              '**Typecheck:**', snip('typecheck.log'),
+              '**Build:**', snip('build.log'),
+              '**Audit:**', snip('audit.log'),
+              '**Depcheck:**', snip('depcheck.log'),
+              '_Full logs attached as artifact: **ci-logs**_'
+            ].join('\\n\\n');
+            if (context.payload.pull_request) {
+              github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body
+              });
+            } else {
+              core.notice('No PR context; summary not posted.');
+            }
+      - name: Fail if lint/type/build failed
+        if: |
+          steps.verify.outcome == 'failure'
+        run: exit 1

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import BackgroundFX from "@/components/BackgroundFX";
 import { Github, Linkedin, Mail, ArrowRight, TerminalSquare, Shield, Bolt, Globe2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -65,7 +66,7 @@ export default function Portfolio() {
           >
             <div className="flex items-center gap-4 mt-2">
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Giuseppe</h1>
-              <span className="text-lg font-mono text-indigo-400">"joo-zep-peh"</span>
+              <span className="text-lg font-mono text-indigo-400">&quot;joo-zep-peh&quot;</span>
               <button
                 aria-label="Play pronunciation"
                 className="bg-slate-900 text-indigo-400 rounded-full p-2 hover:bg-indigo-500 hover:text-white transition"
@@ -101,13 +102,13 @@ export default function Portfolio() {
                 Email Me
                 <svg width="18" height="18" viewBox="0 0 20 20" fill="black" xmlns="http://www.w3.org/2000/svg"><path d="M7 5l5 5-5 5" stroke="black" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </a>
-              <a
+              <Link
                 href="/projects"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-700 bg-transparent text-zinc-100 hover:bg-slate-900 transition hover:animate-pulse"
               >
                 See Projects
                 <svg width="18" height="18" viewBox="0 0 20 20" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M7 5l5 5-5 5" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </a>
+              </Link>
             </div>
           </motion.div>
         </div>
@@ -264,7 +265,7 @@ function Typewriter({ text }: { text: string }) {
   );
 }
 
-function IconLink({ href, label, Icon }: { href: string; label: string; Icon: any }) {
+function IconLink({ href, label, Icon }: { href: string; label: string; Icon: React.ComponentType<{size?: number, color?: string}> }) {
   return (
     <a
       href={href}
@@ -303,7 +304,7 @@ function SectionTitle({ kicker, title }: { kicker: string; title: string }) {
   );
 }
 
-function ValueCard({ Icon, title, desc }: { Icon: any; title: string; desc: string }) {
+function ValueCard({ Icon, title, desc }: { Icon: React.ComponentType<{size?: number}> ; title: string; desc: string }) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.35)] hover:shadow-[0_30px_90px_-28px_rgba(79,70,229,0.18)] hover:border-indigo-500/40 transition-shadow">
       <div className="flex items-center gap-3">
