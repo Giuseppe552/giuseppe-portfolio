@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import BackgroundFX from "@/components/BackgroundFX";
-import { Github, Linkedin, Mail, ArrowRight, TerminalSquare, Shield, Bolt, Globe2 } from "lucide-react";
+import { Mail, ArrowRight, TerminalSquare, Shield, Bolt, Globe2 } from "lucide-react";
 import { motion } from "framer-motion";
 import ResponsiveHeader from "@/components/ResponsiveHeader";
 
@@ -15,7 +15,7 @@ import ResponsiveHeader from "@/components/ResponsiveHeader";
 
 export default function Portfolio() {
   const [progress, setProgress] = useState(0);
-  const [lang, setLang] = useState<"EN" | "ITA">("EN");
+  const [lang] = useState<"EN" | "ITA">("EN");
 
   useEffect(() => {
     const onScroll = () => {
@@ -27,16 +27,6 @@ export default function Portfolio() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const nav = useMemo(
-    () => [
-      { id: "about", label: lang === "EN" ? "About" : "Chi Sono" },
-      { id: "work", label: lang === "EN" ? "Work" : "Progetti" },
-      { id: "projects", label: lang === "EN" ? "Projects" : "Progetti" },
-      { id: "contact", label: lang === "EN" ? "Contact" : "Contatti" },
-    ],
-    [lang]
-  );
 
   return (
   <div className="min-h-screen text-zinc-100 relative" style={{fontFamily:'JetBrains Mono, monospace', cursor:'url(/cursor.svg), pointer'}}>
@@ -262,20 +252,6 @@ function Typewriter({ text }: { text: string }) {
       {text.slice(0, shown)}
       <span className="inline-block w-2 h-5 align-[-2px] bg-indigo-400 animate-pulse ml-1" />
     </p>
-  );
-}
-
-function IconLink({ href, label, Icon }: { href: string; label: string; Icon: React.ComponentType<{size?: number, color?: string}> }) {
-  return (
-    <a
-      href={href}
-      aria-label={label}
-      className="p-2 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 transition"
-      target="_blank"
-      rel="noreferrer"
-    >
-      <Icon size={18} />
-    </a>
   );
 }
 

@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { GHRepo, getPortfolioRepos } from "@/lib/github";
-import ReactMarkdown from "react-markdown";
 
 export const metadata = {
   title: "Project Details – Giuseppe Giona",
@@ -69,7 +69,14 @@ export default async function ProjectDetailPage(props: { params: Promise<{ repo:
         <h1 className="text-2xl font-bold mb-4">{repo.name}</h1>
         <div className="border border-neutral-800 bg-zinc-900 rounded-2xl p-6 mb-24 shadow-lg">
           {image && (
-            <img src={image} alt="Project demo" className="rounded-xl border border-neutral-700 mx-auto my-6 max-w-full shadow" style={{ background: '#18181b' }} />
+            <Image 
+              src={image} 
+              alt="Project demo" 
+              width={800} 
+              height={400} 
+              className="rounded-xl border border-neutral-700 mx-auto my-6 max-w-full shadow" 
+              style={{ background: '#18181b' }} 
+            />
           )}
           <div className="mb-4 text-lg text-zinc-200">{summary}</div>
           <div className="flex flex-wrap gap-2 mb-4">
