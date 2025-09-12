@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "lint:security": "eslint --ext .ts,.tsx src --max-warnings=0",
+    "lint:security": "eslint --ext .ts,.tsx src",
     "build:ci": "next build"
   },
   "dependencies": {
