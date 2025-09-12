@@ -47,8 +47,8 @@ jobs:
       - name: Dependency check (unused/missing)
         run: |
           mkdir -p reports
-          npx depcheck --json > reports/depcheck.json || true
-          npx depcheck > reports/depcheck.txt || true
+          npx depcheck --config .depcheckrc.json --json > reports/depcheck.json || true
+          npx depcheck --config .depcheckrc.json 2>&1 | tee reports/depcheck.txt || true
         continue-on-error: true
         
       - name: Security scan (ESLint security plugin)
