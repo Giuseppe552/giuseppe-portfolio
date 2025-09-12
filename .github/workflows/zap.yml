@@ -1,0 +1,15 @@
+name: zap-baseline
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+jobs:
+  zap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.11.0
+        with:
+          target: https://giuseppegiona.com
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
