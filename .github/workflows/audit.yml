@@ -1,0 +1,250 @@
+name: repo-audit
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+  issues: write
+concurrency:
+  group: audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NODE_VERSION: '20'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with: 
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Install (no scripts)
+        run: npm ci --ignore-scripts
+
+      - name: List postinstall scripts (awareness only)
+        run: |
+          node -e "const p=require('./package.json');console.log('postinstall:', p.scripts?.postinstall||'none')"
+
+      - name: Install (normal)
+        run: npm ci
+
+      # ---- Static code quality / security
+      - name: ESLint (JSON)
+        run: npx eslint --ext .ts,.tsx src -f json -o reports/eslint.json || true
+
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit --pretty false 2>&1 | tee reports/typecheck.txt || true
+
+      - name: Build (capture log)
+        run: npm run build:ci 2>&1 | tee reports/build.txt || true
+
+      - name: NPM Audit (prod, high+)
+        run: npm audit --production --audit-level=high 2>&1 | tee reports/npm-audit.txt || true
+
+      - name: Depcheck (with config if present)
+        run: |
+          if [ -f .depcheckrc.json ]; then
+            npx depcheck --config .depcheckrc.json 2>&1 | tee reports/depcheck.txt || true
+          else
+            npx depcheck 2>&1 | tee reports/depcheck.txt || true
+          fi
+
+      - name: Gitleaks (secrets scan → SARIF)
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --source . --no-banner --redact --report-format sarif --report-path reports/gitleaks.sarif
+        continue-on-error: true
+
+      - name: Upload SARIF (secrets)
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: reports/gitleaks.sarif
+        continue-on-error: true
+
+      # ---- Deployed site checks (pick Preview if PR, else production)
+      - name: Resolve target URL
+        id: target
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "url=https://giuseppegiona.com" >> $GITHUB_OUTPUT
+          else
+            echo "url=https://giuseppegiona.com" >> $GITHUB_OUTPUT
+          fi
+          echo "Target: $(cat $GITHUB_OUTPUT)"
+
+      - name: Fetch headers
+        run: |
+          url="${{ steps.target.outputs.url }}"
+          curl -s -I "$url" | tee reports/headers.txt
+          node - <<'JS' > reports/headers-eval.txt
+          const fs=require('fs');
+          const h=fs.readFileSync('reports/headers.txt','utf8');
+          function has(k,v){return new RegExp('^'+k+':\\s*'+v,'im').test(h)}
+          const checks = {
+            'Content-Security-Policy present': /content-security-policy:/i.test(h),
+            'X-Frame-Options SAMEORIGIN': /x-frame-options:\s*sameorigin/i.test(h),
+            'X-Content-Type-Options nosniff': /x-content-type-options:\s*nosniff/i.test(h),
+            'Referrer-Policy strict-origin-when-cross-origin': /referrer-policy:\s*strict-origin-when-cross-origin/i.test(h),
+            'Strict-Transport-Security >= 2y': /strict-transport-security:\s*max-age=(\d+)/i.test(h) && (parseInt(h.match(/strict-transport-security:\s*max-age=(\d+)/i)?.[1]||'0',10) >= 63072000)
+          };
+          console.log(Object.entries(checks).map(([k,v])=>`${v?'✅':'❌'} ${k}`).join('\n'));
+          JS
+
+      - name: Lighthouse (perf/a11y/SEO, HTML report)
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: ${{ steps.target.outputs.url }}
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        continue-on-error: true
+
+      - name: Lychee link check (code + site)
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: --verbose --no-progress --exclude-mail --timeout 20s "src/**/*.tsx" "public/**/*.html" ${{ steps.target.outputs.url }}
+        continue-on-error: true
+
+      - name: ZAP Baseline (non-blocking; artifact only)
+        uses: zaproxy/action-baseline@v0.11.0
+        with:
+          target: ${{ steps.target.outputs.url }}
+          cmd_options: "-a -T 120"
+        continue-on-error: true
+
+      - name: Collect environment & tree
+        run: |
+          npx envinfo --system --binaries --browsers --npmPackages next,react,react-dom,typescript,eslint > reports/envinfo.txt
+          git ls-files > reports/git-files.txt
+
+      - name: Upload audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-artifacts
+          path: reports/
+          if-no-files-found: warn
+
+      - name: Summarize to AUDIT.md and PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = p => fs.existsSync(p) ? fs.readFileSync(p,'utf8') : 'n/a';
+            const head = (s,n=3000)=>'```\n'+(s==='n/a'?'n/a':s.slice(0,n))+'\n```';
+            const summary = [
+              '# Full Repo Audit – Summary',
+              '## Static analysis',
+              '### ESLint (first findings)', head(path('reports/eslint.json')),
+              '### Typecheck', head(path('reports/typecheck.txt')),
+              '### Build', head(path('reports/build.txt')),
+              '### NPM audit', head(path('reports/npm-audit.txt')),
+              '### Depcheck', head(path('reports/depcheck.txt')),
+              '### Secrets (Gitleaks SARIF uploaded)', head(path('reports/gitleaks.sarif'), 800),
+              '## Deployed checks',
+              '### Security headers (evaluation)', head(path('reports/headers-eval.txt')),
+              '### Raw headers', head(path('reports/headers.txt')),
+              '### Lighthouse: see workflow artifacts for HTML report',
+              '### ZAP: see workflow artifacts for HTML report',
+              '---',
+              '_All raw outputs attached as artifact **audit-artifacts**._'
+            ].join('\n\n');
+            fs.writeFileSync('AUDIT.md', summary);
+            if (context.payload.pull_request) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: summary
+              });
+            }
+
+      - name: Commit AUDIT.md to branch
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add AUDIT.md
+          git commit -m "chore(audit): add AUDIT.md summary" || echo "no changes"
+          git push
+
+  triage:
+    needs: audit
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download audit artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: audit-artifacts
+          path: reports/
+
+      - name: Parse reports and open issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const mk = (t,b,l)=>github.rest.issues.create({owner:context.repo.owner,repo:context.repo.repo,title:t,body:b,labels:l});
+            function onceTitle(t){ return github.rest.search.issuesAndPullRequests({q:`repo:${context.repo.owner}/${context.repo.repo} is:issue in:title "${t}"`}).then(r=>r.data.total_count===0); }
+
+            // 1) Headers
+            const hdr = fs.existsSync('reports/headers-eval.txt') ? fs.readFileSync('reports/headers-eval.txt','utf8') : '';
+            const missing = [];
+            if(!/✅.*Content-Security-Policy/i.test(hdr)) missing.push('Content-Security-Policy missing');
+            if(!/✅.*X-Frame-Options SAMEORIGIN/i.test(hdr)) missing.push('X-Frame-Options SAMEORIGIN not set');
+            if(!/✅.*X-Content-Type-Options nosniff/i.test(hdr)) missing.push('X-Content-Type-Options nosniff not set');
+            if(!/✅.*Referrer-Policy strict-origin-when-cross-origin/i.test(hdr)) missing.push('Referrer-Policy not strict-origin-when-cross-origin');
+            if(!/✅.*Strict-Transport-Security/i.test(hdr)) missing.push('Strict-Transport-Security < 2 years');
+            for (const m of missing) {
+              if (await onceTitle(`[security][headers] ${m}`)) await mk(`[security][headers] ${m}`, 'See `reports/headers.txt` and `AUDIT.md`.', ['security','headers']);
+            }
+
+            // 2) ESLint JSON – open top 5 unique rule findings
+            if (fs.existsSync('reports/eslint.json')) {
+              const data = JSON.parse(fs.readFileSync('reports/eslint.json','utf8'));
+              const items = {};
+              for (const f of data) for (const m of (f.messages||[])) {
+                const key = `${m.ruleId||m.message}`;
+                items[key] = (items[key]||0) + 1;
+              }
+              const top = Object.entries(items).sort((a,b)=>b[1]-a[1]).slice(0,5);
+              for (const [rule,count] of top) {
+                const title = `[lint] ${rule} (${count})`;
+                if (await onceTitle(title)) await mk(title, `Top recurring lint finding: **${rule}** – ${count} occurrences.\n\nSee artifact: audit-artifacts/eslint.json`, ['lint']);
+              }
+            }
+
+            // 3) NPM audit
+            if (fs.existsSync('reports/npm-audit.txt')) {
+              const txt = fs.readFileSync('reports/npm-audit.txt','utf8');
+              if (!/0 vulnerabilities/i.test(txt)) {
+                const title='[deps] vulnerabilities found by npm audit';
+                if (await onceTitle(title)) await mk(title, 'See audit-artifacts/npm-audit.txt', ['security','dependencies']);
+              }
+            }
+
+            // 4) Dead links
+            if (fs.existsSync(process.env.GITHUB_WORKSPACE + '/lychee/out.md')) {
+              const title='[content] Dead links detected';
+              if (await onceTitle(title)) await mk(title, 'Lychee reported dead links. See workflow logs.', ['content']);
+            }
+
+            // 5) Lighthouse score gates (open issues if below thresholds)
+            const perf = 0, a11y=0, seo=0; // (treosh action prints report; if JSON is available, parse and gate ≥90)
+            // Keep as placeholder: open a single umbrella issue
+            const title='[perf] Review Lighthouse report';
+            if (await onceTitle(title)) await mk(title, 'Review Lighthouse HTML report in artifacts. Target ≥90 for Performance, Accessibility, SEO.', ['performance']);

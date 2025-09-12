@@ -1,0 +1,15 @@
+{
+  "ignores": [
+    "@types/*",
+    "eslint-*",
+    "postcss",
+    "autoprefixer"
+  ],
+  "skip-missing": false,
+  "ignore-patterns": [
+    "dist",
+    "build",
+    ".next",
+    "node_modules"
+  ]
+}
