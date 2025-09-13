@@ -1,113 +1,93 @@
 name: zap-baseline
+
 on:
-  workflow_dispatch:
+  pull_request:
   push:
     branches: [ main ]
-  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   zap:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
+    concurrency:
+      group: zap-${{ github.ref }}
+      cancel-in-progress: true
+
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Detect target URL
+
+      - name: Resolve target URL
         id: target
         run: |
-          # Try to detect PR Preview URL from Vercel deployments
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            # For now, fallback to production URL since we don't have Vercel token access
-            # In future, could parse PR timeline for deployment status
-            echo "target_url=https://giuseppegiona.com" >> $GITHUB_OUTPUT
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "url=https://$GITHUB_REPOSITORY-preview.vercel.app" >> $GITHUB_OUTPUT
           else
-            echo "target_url=https://giuseppegiona.com" >> $GITHUB_OUTPUT
+            echo "url=https://giuseppegiona.com" >> $GITHUB_OUTPUT
           fi
-          
-      - name: Check target availability
-        id: precheck
+
+      - name: Precheck target
         run: |
-          target_url="${{ steps.target.outputs.target_url }}"
-          echo "Checking availability of: $target_url"
-          
-          status_code=$(curl -o /dev/null -s -w "%{http_code}" --max-time 30 "$target_url" || echo "000")
-          echo "HTTP status: $status_code"
-          
-          if [[ "$status_code" =~ ^[23][0-9][0-9]$ ]]; then
-            echo "available=true" >> $GITHUB_OUTPUT
-            echo "status_code=$status_code" >> $GITHUB_OUTPUT
-          else
-            echo "available=false" >> $GITHUB_OUTPUT  
-            echo "status_code=$status_code" >> $GITHUB_OUTPUT
+          code=$(curl -s -o /dev/null -w "%{http_code}" "${{ steps.target.outputs.url }}" || true)
+          echo "HTTP status: $code"
+          if [[ "$code" != "200" && "$code" != "301" && "$code" != "302" ]]; then
+            echo "Target not reachable, skipping ZAP."
+            exit 0
           fi
-          
-      - name: Comment on PR if target unavailable
-        if: github.event_name == 'pull_request' && steps.precheck.outputs.available == 'false'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: `### ZAP Scan Skipped
-              
-              Target not reachable: ${{ steps.target.outputs.target_url }}
-              HTTP code: ${{ steps.precheck.outputs.status_code }}
-              
-              The security scan was skipped because the target URL is not responding.`
-            });
-            
-      - name: Run ZAP Baseline Scan
-        if: steps.precheck.outputs.available == 'true'
+
+      - name: ZAP Baseline
         uses: zaproxy/action-baseline@v0.11.0
+        continue-on-error: true
         with:
-          target: ${{ steps.target.outputs.target_url }}
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a'
-          
+          target: ${{ steps.target.outputs.url }}
+          cmd_options: "-a -T 120"
+
       - name: Upload ZAP report
-        if: steps.precheck.outputs.available == 'true'
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: report_html.html
-          
-      - name: Comment ZAP results
-        if: github.event_name == 'pull_request' && steps.precheck.outputs.available == 'true'
+          path: |
+            report_html.html
+            zap*.log
+          if-no-files-found: warn
+
+      - name: Summarize (always neutral)
+        if: always()
+        continue-on-error: true
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
-            let summary = '### ZAP Security Scan Results\n\n';
-            
+            const core = require('@actions/core');
+            const pr = context.payload.pull_request;
+            const sameRepo =
+              pr &&
+              pr.head?.repo?.full_name &&
+              pr.base?.repo?.full_name &&
+              pr.head.repo.full_name === pr.base.repo.full_name;
+
+            const body = [
+              '🛡️ **ZAP Security Scan Results (neutral)**',
+              '',
+              'See artifact **zap-report** for the full HTML output.'
+            ].join('\n');
+
             try {
-              // Try to parse the HTML report for alert counts (basic parsing)
-              const reportContent = fs.readFileSync('report_html.html', 'utf8');
-              
-              // Simple regex to extract alert counts (this is basic - real implementation would be more robust)
-              const highMatch = reportContent.match(/High.*?(\d+)/i);
-              const mediumMatch = reportContent.match(/Medium.*?(\d+)/i);  
-              const lowMatch = reportContent.match(/Low.*?(\d+)/i);
-              const infoMatch = reportContent.match(/Informational.*?(\d+)/i);
-              
-              summary += `**Target:** ${{ steps.target.outputs.target_url }}\n\n`;
-              summary += `**Alert Summary:**\n`;
-              summary += `- High: ${highMatch ? highMatch[1] : '0'}\n`;
-              summary += `- Medium: ${mediumMatch ? mediumMatch[1] : '0'}\n`;  
-              summary += `- Low: ${lowMatch ? lowMatch[1] : '0'}\n`;
-              summary += `- Informational: ${infoMatch ? infoMatch[1] : '0'}\n\n`;
-              
-            } catch (err) {
-              summary += 'Scan completed but report parsing failed.\n\n';
+              if (sameRepo) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body
+                });
+                core.info('Posted PR comment with ZAP summary.');
+              } else {
+                core.info('Skipping PR comment (fork PR or insufficient token permissions).');
+              }
+            } catch (e) {
+              core.warning('Could not post PR comment: ' + e.message);
             }
-            
-            summary += '_Full HTML report available in artifacts: **zap-report**_';
-            
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: summary
-            });

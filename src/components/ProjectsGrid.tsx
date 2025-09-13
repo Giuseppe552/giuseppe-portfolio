@@ -1,7 +1,8 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import { GHRepo, repoTitle } from "@/lib/github";
+import Image from "next/image";
+import { repoTitle } from "@/lib/github";
 
 export type ProjectCardData = {
   name: string;
@@ -49,9 +50,11 @@ export default function ProjectsGrid({ cards }: { cards: ProjectCardData[] }) {
           <div className="flex flex-col items-start">
             <h3 className="text-2xl font-bold text-zinc-100 mb-2">{repoTitle(repo.name)}</h3>
             {repo.demoImg && (
-              <img
+              <Image
                 src={repo.demoImg}
                 alt={repoTitle(repo.name) + ' demo'}
+                width={600}
+                height={400}
                 className={
                   `w-full object-contain rounded-xl mb-4 outline outline-2 outline-indigo-500 outline-offset-0 ` +
                   (repoTitle(repo.name) === "Retail Bi Simulator"

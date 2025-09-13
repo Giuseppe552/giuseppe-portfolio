@@ -9,7 +9,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     env:
-      ENFORCE_LINT: 'false'
+      ENFORCE_LINT: ${{ github.ref_name == 'copilot/fix-37bc4019-5708-4fb2-b5c2-a1c4bb6955e7' && 'true' || 'false' }}
     permissions:
       contents: read
       pull-requests: write
@@ -33,7 +33,7 @@ jobs:
       - name: Audit (prod, high+)
         run: npm audit --production --audit-level=high 2>&1 | tee audit.log || true
       - name: Depcheck (unused/missing deps)
-        run: npx depcheck 2>&1 | tee depcheck.log || true
+        run: npx depcheck --config .depcheckrc.json 2>&1 | tee depcheck.log || true
       - uses: actions/upload-artifact@v4
         with:
           name: ci-logs

@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
+// rationale: paths are built from sanitized slugs and containment-checked against BLOG_DIR
 import fs from "fs";
 import path from "path";
 

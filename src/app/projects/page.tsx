@@ -10,18 +10,6 @@ export const metadata = {
   title: "Projects – Giuseppe Giona",
 };
 
-const GITHUB_USER = 'Giuseppe552';
-
-function isGithubRepoUrl(input: string): boolean {
-  try {
-    const u = new URL(input);
-    if (!(u.protocol === "http:" || u.protocol === "https:")) return false;
-    if (u.hostname !== "github.com") return false;
-    const parts = u.pathname.split("/").filter(Boolean);
-    return parts.length >= 2 && /^[A-Za-z0-9_.-]+$/.test(parts[0]) && /^[A-Za-z0-9_.-]+$/.test(parts[1]);
-  } catch { return false; }
-}
-
 export default async function ProjectsPage() {
   let repos: GHRepo[] = [];
   try {
