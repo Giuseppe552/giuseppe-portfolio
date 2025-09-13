@@ -26,3 +26,41 @@ body {
   cursor: crosshair !important;
 }
 }
+
+
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5em 0;
+}
+th, td {
+  border: 1px solid #444;
+  padding: 8px 12px;
+}
+th {
+  background: #222;
+  color: #7DD3FC;
+}
+td {
+  background: #161616;
+  color: #ededed;
+}
+
+
+pre {
+  background: #222;
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 1em;
+  border-radius: 0.5em;
+  margin: 1.5em 0;
+  overflow-x: auto;
+  font-size: 1rem;
+}
+/* Optional: add syntax highlighting if you want colors instead of just white text */
+code {
+  background: none;
+  color: inherit;
+  font-family: inherit;
+}
