@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# giuseppegiona.com 🌐
 
-## Getting Started
+This repository contains the source code for my personal website and blog: [giuseppegiona.com](https://giuseppegiona.com).  
+It’s my space to share projects, write about software development, and document what I’m learning along the way.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Portfolio** — Showcasing my software projects and experiments.  
+- **Blog** — Articles on coding, security, DevOps, and growth as a developer.  
+- **Responsive design** — Optimized for desktop and mobile.  
+- **Performance-focused** — Built with Next.js 15, TypeScript, and TailwindCSS.  
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔒 Security & Reliability
 
-## Learn More
+I’ve set this project up with **production-grade practices**, even as a personal site:
 
-To learn more about Next.js, take a look at the following resources:
+- Enforced **security headers** (CSP, HSTS, Referrer Policy, X-Frame-Options, X-Content-Type-Options).  
+- Continuous Integration (CI) with:
+  - **ESLint + TypeScript checks** (0 warnings)  
+  - **Dependency audit** (npm + depcheck)  
+  - **ZAP Baseline security scans**  
+- Branch protection rules on `main` (all PRs must pass checks before merge).  
+- Automatic Vercel deployments with preview environments for every PR.  
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Tech Stack
 
-## Deploy on Vercel
+- [Next.js](https://nextjs.org/) (App Router)  
+- [TypeScript](https://www.typescriptlang.org/)  
+- [TailwindCSS](https://tailwindcss.com/)  
+- [Framer Motion](https://www.framer.com/motion/) for smooth animations  
+- [Vercel](https://vercel.com/) for hosting and CI/CD  
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🚀 Deployment
+
+Every push to `main` is automatically deployed via [Vercel](https://vercel.com/).  
+Pull requests spin up **preview deployments** so I can test changes before merging.  
+
+---
+
+## 📚 Blog & Learning
+
+The blog includes posts on:
+
+- Software engineering fundamentals  
+- Debugging and problem-solving  
+- DevOps, automation, and security  
+- Reflections from my journey as a developer  
+
+---
+
+## 🤝 Contributing
+
+This is primarily my personal portfolio, but feedback, ideas, and discussions are always welcome.  
+Feel free to open an issue if you spot something that could be improved.  
+
+---
+
+## 📜 License
+
+MIT License © Giuseppe Giona  
