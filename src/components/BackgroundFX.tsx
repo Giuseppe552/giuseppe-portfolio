@@ -83,7 +83,7 @@ export default function BackgroundFX({ scanlinePosition = '20px' }: { scanlinePo
       </div>
   {/* Scanline - move lower so it's not inside a project box */}
   {scanlinePosition !== 'none' ? (
-  <div className="pointer-events-none fixed left-0 right-0 h-[3px] opacity-5 bg-gradient-to-b from-transparent to-black" style={{ bottom: scanlinePosition }} />
+  <div className="pointer-events-none fixed left-0 right-0 h-[3px] opacity-5 bg-gradient-to-b from-transparent to-black scanline" data-bottom={scanlinePosition} />
   ) : null}
     </React.Fragment>
   );
