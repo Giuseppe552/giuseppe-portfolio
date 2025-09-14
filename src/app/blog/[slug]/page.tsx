@@ -1,6 +1,6 @@
 "use server";
 import matter from "gray-matter";
-import React from "react";
+// ...existing code...
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -10,8 +10,88 @@ import SiteFooter from "@/components/SiteFooter";
 import { readBlogFile, listBlogSlugs } from "@/lib/safeFs";
 
 // --- ADD THESE IMPORTS for syntax highlighting ---
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import React from "react";
+import Prism from "prismjs";
+import "prismjs/components/prism-jsx";
+import "prismjs/components/prism-tsx";
+import "prismjs/components/prism-typescript";
+import "prismjs/components/prism-python";
+import "prismjs/components/prism-bash";
+import "prismjs/components/prism-json";
+import "prismjs/components/prism-markdown";
+// Add more Prism languages as needed
+
+// oneDark theme CSS
+const prismOneDark = `
+.prism-one-dark {
+  background: #282c34;
+  color: #abb2bf;
+  border-radius: 0.5em;
+  font-size: 1rem;
+  margin: 1.5em 0;
+  font-family: 'JetBrains Mono', monospace;
+  overflow-x: auto;
+  padding: 1em;
+}
+.prism-one-dark .token.comment,
+.prism-one-dark .token.prolog,
+.prism-one-dark .token.doctype,
+.prism-one-dark .token.cdata {
+  color: #5c6370;
+  font-style: italic;
+}
+.prism-one-dark .token.punctuation,
+.prism-one-dark .token.operator {
+  color: #abb2bf;
+}
+.prism-one-dark .token.property,
+.prism-one-dark .token.tag,
+.prism-one-dark .token.boolean,
+.prism-one-dark .token.number,
+.prism-one-dark .token.constant,
+.prism-one-dark .token.symbol,
+.prism-one-dark .token.deleted {
+  color: #e06c75;
+}
+.prism-one-dark .token.selector,
+.prism-one-dark .token.attr-name,
+.prism-one-dark .token.string,
+.prism-one-dark .token.char,
+.prism-one-dark .token.builtin,
+.prism-one-dark .token.inserted {
+  color: #98c379;
+}
+.prism-one-dark .token.function,
+.prism-one-dark .token.class-name {
+  color: #61afef;
+}
+.prism-one-dark .token.variable {
+  color: #d19a66;
+}
+.prism-one-dark .token.keyword,
+.prism-one-dark .token.control,
+.prism-one-dark .token.directive,
+.prism-one-dark .token.unit {
+  color: #c678dd;
+}
+.prism-one-dark .token.bold,
+.prism-one-dark .token.important {
+  font-weight: bold;
+}
+.prism-one-dark .token.italic {
+  font-style: italic;
+}
+.prism-one-dark .token.entity {
+  cursor: help;
+}
+`;
+
+if (typeof window !== "undefined" && !document.getElementById("prism-one-dark-style")) {
+  const style = document.createElement("style");
+  style.id = "prism-one-dark-style";
+  style.innerHTML = prismOneDark;
+  document.head.appendChild(style);
+}
 // ------------------------------------------------
 
 export async function generateStaticParams() {
@@ -73,25 +153,36 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                     </a>
                   ),
                   // --- NEW: Syntax-highlighted code blocks ---
-                  code({ node, inline, className, children, ...props }) {
+                  code({ node, className, children, ...props }) {
                     const match = /language-(\w+)/.exec(className || "");
-                    return !inline && match ? (
-                      <SyntaxHighlighter
-                        style={oneDark}
-                        language={match[1]}
-                        PreTag="div"
-                        customStyle={{
-                          borderRadius: "0.5em",
-                          fontSize: "1rem",
-                          background: "#222",
-                          margin: "1.5em 0",
-                          fontFamily: "'JetBrains Mono', monospace",
-                        }}
-                        {...props}
-                      >
-                        {String(children).replace(/\n$/, "")}
-                      </SyntaxHighlighter>
-                    ) : (
+                    if (match) {
+                      const lang = match[1];
+                      let html = "";
+                      try {
+                        html = Prism.highlight(String(children), Prism.languages[lang] || Prism.languages.javascript, lang);
+                      } catch {
+                        html = String(children);
+                      }
+                      return (
+                        <pre className={`prism-one-dark language-${lang}`}
+                          style={{
+                            borderRadius: "0.5em",
+                            fontSize: "1rem",
+                            background: "#282c34",
+                            margin: "1.5em 0",
+                            fontFamily: "'JetBrains Mono', monospace",
+                            overflowX: "auto",
+                            padding: "1em"
+                          }}
+                        >
+                          <code
+                            className={`language-${lang}`}
+                            dangerouslySetInnerHTML={{ __html: html }}
+                          />
+                        </pre>
+                      );
+                    }
+                    return (
                       <code
                         className={className}
                         style={{

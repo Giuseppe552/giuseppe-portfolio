@@ -1,16 +1,18 @@
 // next.config.mjs
 /** @type {import('next').NextConfig} */
 
-// Dev-safe CSP - will remove 'unsafe-eval' and most 'unsafe-inline' in production once build is green
-const csp = `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.vercel.sh https://*.vercel-insights.com; frame-src https://www.youtube.com https://player.vimeo.com; form-action 'self';`;
+// Hardened CSP for production, dev-safe for development
+const devCsp = `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.vercel.sh https://*.vercel-insights.com; frame-src https://www.youtube.com https://player.vimeo.com; form-action 'self';`;
+const prodCsp = `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.vercel.sh https://*.vercel-insights.com; frame-src https://www.youtube.com https://player.vimeo.com; form-action 'self';`;
 
 const nextConfig = {
   async headers() {
+    const isProd = process.env.NODE_ENV === 'production';
     return [
       {
         source: '/(.*)',
         headers: [
-          { key: 'Content-Security-Policy', value: csp },
+          { key: 'Content-Security-Policy', value: isProd ? prodCsp : devCsp },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
