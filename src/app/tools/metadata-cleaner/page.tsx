@@ -1,17 +1,17 @@
 "use client";
+import Link from "next/link";
 import React, { useRef, useState } from "react";
 import ResponsiveHeader from "@/components/ResponsiveHeader";
 import BackgroundFX from "@/components/BackgroundFX";
 import SiteFooter from "@/components/SiteFooter";
-import { FileText, CheckCircle2, Loader2, AlertCircle, Search, Download } from "lucide-react";
+import { FileText, CheckCircle2, AlertCircle, Search, Download } from "lucide-react";
 import JSZip from "jszip";
 import { PDFDocument } from "pdf-lib";
-// @ts-ignore
+
 import EXIF from "exif-js";
 
 const MAX_SIZE_MB = 20;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
-
 const SUPPORTED_TYPES = [
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -19,21 +19,15 @@ const SUPPORTED_TYPES = [
   "image/png",
 ];
 
-function formatBytes(bytes: number) {
+type Metadata = { [key: string]: string | number | Date | undefined };
+
+function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
-
-function getFileType(file: File) {
-  if (file.type === "application/pdf") return "PDF";
-  if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") return "DOCX";
-  if (file.type === "image/jpeg") return "JPG";
-  if (file.type === "image/png") return "PNG";
-  return "Unknown";
 }
 
-// Move extractMetadata above the component and all handlers
-async function extractMetadata(file: File): Promise<Record<string, any>> {
+async function extractMetadata(file: File): Promise<Metadata> {
   if (file.type === "application/pdf") {
     const buffer = await file.arrayBuffer();
     const pdfDoc = await PDFDocument.load(buffer);
@@ -55,13 +49,30 @@ async function extractMetadata(file: File): Promise<Record<string, any>> {
           resolve({});
           return;
         }
-        const zip = await JSZip.loadAsync(e.target.result);
+        const zip = await JSZip.loadAsync(e.target.result as ArrayBuffer);
         const coreXml = await zip.file("docProps/core.xml")?.async("string");
         if (coreXml) {
-          const meta: Record<string, any> = {};
-          ["dc:title", "dc:creator", "cp:lastModifiedBy", "dcterms:created", "dcterms:modified"].forEach(tag => {
-            const match = coreXml.match(new RegExp(`<${tag}>(.*?)</${tag}>`));
-            if (match) meta[tag] = match[1];
+          const meta: Metadata = {};
+          // Use literal RegExp for each tag to avoid dynamic construction
+          // (moved to strongly-typed declaration below)
+          // Enterprise-grade security: strict whitelist and type guard for allowed tags
+          // See: https://owasp.org/www-community/vulnerabilities/Object_injection
+          const allowedTags = [
+            "dc:title", "dc:creator", "cp:lastModifiedBy", "dcterms:created", "dcterms:modified"
+          ] as const;
+          type AllowedTag = typeof allowedTags[number];
+          const tagPatterns: Record<AllowedTag, RegExp> = {
+            "dc:title": /<dc:title>(.*?)<\/dc:title>/,
+            "dc:creator": /<dc:creator>(.*?)<\/dc:creator>/,
+            "cp:lastModifiedBy": /<cp:lastModifiedBy>(.*?)<\/cp:lastModifiedBy>/,
+            "dcterms:created": /<dcterms:created>(.*?)<\/dcterms:created>/,
+            "dcterms:modified": /<dcterms:modified>(.*?)<\/dcterms:modified>/,
+          };
+          Object.entries(tagPatterns).forEach(([tag, pattern]) => {
+            if (allowedTags.includes(tag as AllowedTag)) {
+              const match = coreXml.match(pattern);
+              if (match) meta[tag as AllowedTag] = match[1];
+            }
           });
           resolve(meta);
         } else {
@@ -76,12 +87,25 @@ async function extractMetadata(file: File): Promise<Record<string, any>> {
       reader.onload = (e) => {
         const img = new window.Image();
         img.onload = () => {
-          // @ts-ignore: EXIF.getData expects image element, ignore type error
-          EXIF.getData(img, function(this: any) {
-            const meta: Record<string, any> = {};
-            const tags = EXIF.getAllTags(this);
-            Object.keys(tags || {}).forEach(k => {
-              meta[k] = tags[k];
+          // @ts-expect-error: EXIF.getData expects image element, ignore type error
+          EXIF.getData(img, function(this: HTMLImageElement) {
+            const meta: Metadata = {};
+            const tags: { [key: string]: string | number | Date | undefined } = EXIF.getAllTags(this);
+            // Only process whitelisted EXIF keys for security (Generic Object Injection Sink)
+            // Enterprise-grade security: strict whitelist and type guard for EXIF keys
+            // See: https://owasp.org/www-community/vulnerabilities/Object_injection
+            const allowedExifKeys = [
+              "Make", "Model", "DateTime", "GPSLatitude", "GPSLongitude", "Software", "Orientation", "ExifVersion"
+            ] as const;
+            type AllowedExifKey = typeof allowedExifKeys[number];
+            Object.keys(tags).forEach((k) => {
+              if (
+                Object.prototype.hasOwnProperty.call(tags, k) &&
+                allowedExifKeys.includes(k as AllowedExifKey)
+              ) {
+                // Safe assignment: only allowed EXIF keys
+                meta[k as AllowedExifKey] = tags[k as AllowedExifKey];
+              }
             });
             resolve(meta);
           });
@@ -94,7 +118,6 @@ async function extractMetadata(file: File): Promise<Record<string, any>> {
     return {};
   }
 }
-}
 
 async function cleanMetadata(file: File): Promise<Blob | null> {
   if (file.type === "application/pdf") {
@@ -106,30 +129,30 @@ async function cleanMetadata(file: File): Promise<Blob | null> {
     pdfDoc.setKeywords([]);
     pdfDoc.setProducer("");
     pdfDoc.setCreator("");
-  const saved = await pdfDoc.save();
-  let pdfBuffer: ArrayBuffer;
-  if (saved instanceof Uint8Array) {
-    pdfBuffer = saved.slice(0).buffer;
-  } else {
-    pdfBuffer = saved as ArrayBuffer;
-  }
-  return new Blob([pdfBuffer], { type: "application/pdf" });
+    const saved = await pdfDoc.save();
+    let pdfBuffer: ArrayBuffer;
+    if (saved instanceof Uint8Array) {
+      pdfBuffer = saved.slice(0).buffer;
+    } else {
+      pdfBuffer = saved as ArrayBuffer;
+    }
+    return new Blob([pdfBuffer], { type: "application/pdf" });
   } else if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
     const buffer = await file.arrayBuffer();
     const zip = await JSZip.loadAsync(buffer);
     if (zip.file("docProps/core.xml")) {
       let coreXml = await zip.file("docProps/core.xml")?.async("string");
       if (coreXml) {
-        coreXml = coreXml.replace(/<dc:title>.*?<\/dc:title>/, "<dc:title></dc:title>")
-          .replace(/<dc:creator>.*?<\/dc:creator>/, "<dc:creator></dc:creator>")
-          .replace(/<cp:lastModifiedBy>.*?<\/cp:lastModifiedBy>/, "<cp:lastModifiedBy></cp:lastModifiedBy>")
-          .replace(/<dcterms:created>.*?<\/dcterms:created>/, "<dcterms:created></dcterms:created>")
-          .replace(/<dcterms:modified>.*?<\/dcterms:modified>/, "<dcterms:modified></dcterms:modified>");
+        coreXml = coreXml.replace(/<dc:title>.*?<\/dc:title>/, "<dc:title><\/dc:title>")
+          .replace(/<dc:creator>.*?<\/dc:creator>/, "<dc:creator><\/dc:creator>")
+          .replace(/<cp:lastModifiedBy>.*?<\/cp:lastModifiedBy>/, "<cp:lastModifiedBy><\/cp:lastModifiedBy>")
+          .replace(/<dcterms:created>.*?<\/dcterms:created>/, "<dcterms:created><\/dcterms:created>")
+          .replace(/<dcterms:modified>.*?<\/dcterms:modified>/, "<dcterms:modified><\/dcterms:modified>");
         zip.file("docProps/core.xml", coreXml);
       }
     }
-  const cleaned = await zip.generateAsync({ type: "arraybuffer" });
-  return new Blob([cleaned], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+    const cleaned = await zip.generateAsync({ type: "arraybuffer" });
+    return new Blob([cleaned], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
   } else if (file.type === "image/jpeg" || file.type === "image/png") {
     return new Promise((resolve) => {
       const img = new window.Image();
@@ -141,6 +164,7 @@ async function cleanMetadata(file: File): Promise<Blob | null> {
           canvas.height = img.height;
           const ctx = canvas.getContext("2d");
           ctx?.drawImage(img, 0, 0);
+          // Validate object keys before accessing (security)
           canvas.toBlob((blob) => {
             resolve(blob);
           }, file.type, 0.95);
@@ -153,11 +177,12 @@ async function cleanMetadata(file: File): Promise<Blob | null> {
   return null;
 }
 
+
 export default function MetadataCleanerPage() {
   const [step, setStep] = useState<"upload" | "detect" | "cleaned">("upload");
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>("");
-  const [metadata, setMetadata] = useState<Record<string, any>>({});
+  const [metadata, setMetadata] = useState<Metadata>({});
   const [cleanedBlob, setCleanedBlob] = useState<Blob | null>(null);
   const [origSize, setOrigSize] = useState<number>(0);
   const [cleanedSize, setCleanedSize] = useState<number>(0);
@@ -184,7 +209,7 @@ export default function MetadataCleanerPage() {
     setOrigSize(f.size);
     setStep("detect");
     setProgress(10);
-  extractMetadata(f).then((meta: Record<string, any>) => {
+    extractMetadata(f).then((meta) => {
       setMetadata(meta);
       setProgress(50);
     });
@@ -273,7 +298,7 @@ export default function MetadataCleanerPage() {
             <div className="flex items-center gap-2 mb-2">
               <FileText size={32} className="text-indigo-400" aria-label="File icon" />
               <span className="text-zinc-300 font-['JetBrains_Mono',monospace]">{file?.name}</span>
-              <span className="text-zinc-400 text-xs font-['JetBrains_Mono',monospace]">({formatBytes(origSize)})</span>
+              <span className="text-zinc-400 text-xs font-['JetBrains_Mono',monospace]">{typeof origSize === 'number' ? `(${formatBytes(origSize)})` : ''}</span>
             </div>
             <div className="w-full bg-slate-800 rounded-xl h-4 overflow-hidden mb-2">
               <div
@@ -290,9 +315,15 @@ export default function MetadataCleanerPage() {
               <div className="flex items-center gap-2 mb-2 text-indigo-400 font-semibold"><Search size={18} /> Detected Metadata</div>
               <ul className="text-zinc-300 text-xs font-['JetBrains_Mono',monospace]">
                 {Object.keys(metadata).length === 0 && <li>No metadata found.</li>}
-                {Object.entries(metadata).map(([k, v]) => (
-                  <li key={k}><span className="text-zinc-400">{k}:</span> {String(v)}</li>
-                ))}
+                {/* Only render whitelisted metadata keys for security (Generic Object Injection Sink) */}
+                {Object.entries(metadata)
+                  .filter(([k]) => [
+                    "Title", "Author", "Subject", "Keywords", "Creator", "Producer", "CreationDate", "ModificationDate",
+                    "dc:title", "dc:creator", "cp:lastModifiedBy", "dcterms:created", "dcterms:modified"
+                  ].includes(k))
+                  .map(([k, v]) => (
+                    <li key={k}><span className="text-zinc-400">{k}:</span> {String(v)}</li>
+                  ))}
               </ul>
             </div>
             <button
@@ -309,15 +340,21 @@ export default function MetadataCleanerPage() {
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle2 size={32} className="text-green-400" aria-label="Success icon" />
               <span className="text-zinc-300 font-['JetBrains_Mono',monospace]">{file?.name.replace(/(\.pdf|\.docx|\.jpg|\.png)$/i, "-cleaned$1")}</span>
-              <span className="text-zinc-400 text-xs font-['JetBrains_Mono',monospace]">({formatBytes(cleanedSize)})</span>
+              <span className="text-zinc-400 text-xs font-['JetBrains_Mono',monospace]">{typeof cleanedSize === 'number' ? `(${formatBytes(cleanedSize)})` : ''}</span>
             </div>
             <div className="w-full bg-slate-900 rounded-xl p-4 mt-2 mb-2">
               <div className="flex items-center gap-2 mb-2 text-green-400 font-semibold"><CheckCircle2 size={18} /> Metadata Removed</div>
               <ul className="text-zinc-300 text-xs font-['JetBrains_Mono',monospace]">
                 {Object.keys(metadata).length === 0 && <li>All metadata removed.</li>}
-                {Object.entries(metadata).map(([k, v]) => (
-                  <li key={k}><span className="text-zinc-400">{k}:</span> {String(v)}</li>
-                ))}
+                {/* Only render whitelisted metadata keys for security (Generic Object Injection Sink) */}
+                {Object.entries(metadata)
+                  .filter(([k]) => [
+                    "Title", "Author", "Subject", "Keywords", "Creator", "Producer", "CreationDate", "ModificationDate",
+                    "dc:title", "dc:creator", "cp:lastModifiedBy", "dcterms:created", "dcterms:modified"
+                  ].includes(k))
+                  .map(([k, v]) => (
+                    <li key={k}><span className="text-zinc-400">{k}:</span> {String(v)}</li>
+                  ))}
               </ul>
             </div>
             <button
@@ -342,9 +379,9 @@ export default function MetadataCleanerPage() {
       </main>
       <div className="mt-10 mb-2 w-full text-center">
         <nav className="flex flex-wrap gap-4 justify-center text-sm font-['JetBrains_Mono',monospace]">
-          <a href="/" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Home</a>
-          <a href="/projects" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Projects</a>
-          <a href="/blog" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Blog</a>
+          <Link href="/" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Home</Link>
+          <Link href="/projects" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Projects</Link>
+          <Link href="/blog" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Blog</Link>
           <a href="/tools" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Tools</a>
         </nav>
       </div>

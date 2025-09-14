@@ -74,8 +74,7 @@ export default async function ProjectDetailPage(props: { params: Promise<{ repo:
               alt="Project demo" 
               width={800} 
               height={400} 
-              className="rounded-xl border border-neutral-700 mx-auto my-6 max-w-full shadow" 
-              className="bg-[#18181b]"
+              className="rounded-xl border border-neutral-700 mx-auto my-6 max-w-full shadow bg-[#18181b]"
             />
           )}
           <div className="mb-4 text-lg text-zinc-200">{summary}</div>

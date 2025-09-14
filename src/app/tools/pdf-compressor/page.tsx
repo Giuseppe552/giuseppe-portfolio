@@ -1,5 +1,5 @@
-
 "use client";
+import Link from "next/link";
 import React, { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { CheckCircle2, FileText, Loader2, Download, AlertCircle } from "lucide-react";
@@ -100,12 +100,19 @@ export default function PDFCompressorPage() {
         setStep("upload");
         return;
       }
-      setCompSize(compBytes.byteLength);
-      setCompressedBlob(new Blob([compBytes], { type: "application/pdf" }));
+  setCompSize(compBytes.byteLength);
+  // Ensure compBytes is ArrayBuffer for Blob compatibility
+  let pdfBuffer: ArrayBuffer;
+  if (compBytes instanceof Uint8Array) {
+    pdfBuffer = compBytes.slice(0).buffer;
+  } else {
+    pdfBuffer = compBytes as ArrayBuffer;
+  }
+  setCompressedBlob(new Blob([pdfBuffer], { type: "application/pdf" }));
       setProgress(100);
       setDuration((performance.now() - start) / 1000);
       setStep("download");
-    } catch (err) {
+    } catch {
       setFileError("Compression failed. Please try another PDF.");
       setStep("upload");
     }
@@ -226,9 +233,9 @@ export default function PDFCompressorPage() {
         </div>
         <div className="mt-10 mb-2 w-full text-center">
           <nav className="flex flex-wrap gap-4 justify-center text-sm font-['JetBrains_Mono',monospace]">
-            <a href="/" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Home</a>
-            <a href="/projects" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Projects</a>
-            <a href="/blog" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Blog</a>
+            <Link href="/" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Home</Link>
+            <Link href="/projects" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Projects</Link>
+            <Link href="/blog" className="px-3 py-1 rounded-xl bg-slate-800 text-indigo-400 hover:bg-slate-700 transition">Blog</Link>
           </nav>
         </div>
         <SiteFooter />

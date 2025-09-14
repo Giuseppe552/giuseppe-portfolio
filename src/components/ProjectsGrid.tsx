@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
+// Removed unused import 'Image' to satisfy ESLint (@typescript-eslint/no-unused-vars)
 import { repoTitle } from "@/lib/github";
 
 export type ProjectCardData = {

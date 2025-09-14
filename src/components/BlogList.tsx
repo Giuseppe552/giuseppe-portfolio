@@ -1,9 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import Link from "next/link";
-import ResponsiveHeader from "@/components/ResponsiveHeader";
-import BackgroundFX from "@/components/BackgroundFX";
-import SiteFooter from "@/components/SiteFooter";
 import Typewriter from "@/components/Typewriter";
 
 export type BlogPost = {

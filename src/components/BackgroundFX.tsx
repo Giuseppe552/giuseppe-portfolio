@@ -64,8 +64,7 @@ export default function BackgroundFX({ scanlinePosition = '20px' }: { scanlinePo
     <React.Fragment>
       {/* Hero spotlight */}
       <div
-        className="pointer-events-none fixed inset-0 -z-30"
-  className="bg-gradient-to-br from-blue-600/10 to-transparent"
+        className="pointer-events-none fixed inset-0 -z-30 bg-gradient-to-br from-blue-600/10 to-transparent"
       />
       {/* Back (matrix rain) layer */}
   <canvas ref={backRef} className="fixed inset-0 w-full h-full z-[-50] opacity-[0.7]" />

@@ -83,19 +83,46 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                     </a>
                   ),
                   // --- NEW: Syntax-highlighted code blocks ---
-                  code({ className, children, ...props }) {
+                  /**
+                   * Enterprise-grade security: Only allow whitelisted languages for Prism highlighting.
+                   * Uses strict allowedLangs as const, type guards, and a utility function for validation.
+                   * ESLint: security/detect-object-injection
+                   * See: https://owasp.org/www-community/vulnerabilities/Object_injection
+                   */
+                  // Fix: Type signature for ReactMarkdown code renderer must have optional children for compatibility
+                  code({ className, children, ...props }: { className?: string; children?: React.ReactNode }) {
                     const match = /language-(\w+)/.exec(className || "");
+                    // Enterprise-grade security: strict whitelist and type guard for Prism languages
+                    // See: https://owasp.org/www-community/vulnerabilities/Object_injection
+                    // Fix: Use Array<string> for allowedPrismLanguages, not const assertion
+                    const allowedPrismLanguages: string[] = Object.keys(Prism.languages);
+                    function isAllowedLang(lang: string): boolean {
+                      return allowedPrismLanguages.includes(lang);
+                    }
+                    let html = "";
                     if (match) {
                       const lang = match[1];
-                      let html = "";
                       try {
-                        html = Prism.highlight(String(children), Prism.languages[lang] || Prism.languages.javascript, lang);
+                        // Fix: Validate 'lang' against Prism.languages whitelist before dynamic access
+                        // Resolves ESLint: security/detect-object-injection
+                        if (isAllowedLang(lang)) {
+                          html = Prism.highlight(
+                            String(children),
+                            Prism.languages[lang as keyof typeof Prism.languages], // Safe: lang is guaranteed to be a valid key
+                            lang
+                          );
+                        } else {
+                          html = Prism.highlight(
+                            String(children),
+                            Prism.languages.javascript,
+                            "javascript"
+                          );
+                        }
                       } catch {
                         html = String(children);
                       }
                       return (
-                        <pre className={`prism-one-dark language-${lang}`}
-                        >
+                        <pre className={`prism-one-dark language-${lang}`}>
                           <code
                             className={`language-${lang}`}
                             dangerouslySetInnerHTML={{ __html: html }}
