@@ -185,8 +185,8 @@ export default function PDFCompressorPage() {
             </div>
             <div className="w-full bg-slate-800 rounded-xl h-4 overflow-hidden mb-2">
               <div
-                className="bg-indigo-500 h-4 transition-all"
-                className="progress-bar"
+                className="bg-indigo-500 h-4 transition-all progress-bar"
+                style={{ width: `${progress}%` }}
                 aria-valuenow={progress}
                 aria-valuemin={0}
                 aria-valuemax={100}
