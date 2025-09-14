@@ -9,6 +9,11 @@ import BackgroundFX from "@/components/BackgroundFX";
 import SiteFooter from "@/components/SiteFooter";
 import { readBlogFile, listBlogSlugs } from "@/lib/safeFs";
 
+// --- ADD THESE IMPORTS for syntax highlighting ---
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+// ------------------------------------------------
+
 export async function generateStaticParams() {
   return listBlogSlugs().map(slug => ({ slug }));
 }
@@ -67,7 +72,43 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                       {props.children}
                     </a>
                   ),
+                  // --- NEW: Syntax-highlighted code blocks ---
+                  code({ node, inline, className, children, ...props }) {
+                    const match = /language-(\w+)/.exec(className || "");
+                    return !inline && match ? (
+                      <SyntaxHighlighter
+                        style={oneDark}
+                        language={match[1]}
+                        PreTag="div"
+                        customStyle={{
+                          borderRadius: "0.5em",
+                          fontSize: "1rem",
+                          background: "#222",
+                          margin: "1.5em 0",
+                          fontFamily: "'JetBrains Mono', monospace",
+                        }}
+                        {...props}
+                      >
+                        {String(children).replace(/\n$/, "")}
+                      </SyntaxHighlighter>
+                    ) : (
+                      <code
+                        className={className}
+                        style={{
+                          background: "#222",
+                          padding: "2px 6px",
+                          borderRadius: "0.3em",
+                          fontFamily: "'JetBrains Mono', monospace",
+                        }}
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    );
+                  },
+                  // -----------------------------------------
                 }}
+                
               >{content}</ReactMarkdown>
             </div>
           </div>
