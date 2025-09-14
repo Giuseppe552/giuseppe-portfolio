@@ -37,8 +37,7 @@ export default function Portfolio() {
       {/* Top progress bar */}
       <div className="fixed top-0 left-0 right-0 h-[3px] bg-slate-800 z-50">
         <motion.div
-          className="h-full bg-indigo-500"
-          className="progress-bar"
+          className="h-full bg-indigo-500 progress-bar"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ type: "tween", duration: 0.08 }}
