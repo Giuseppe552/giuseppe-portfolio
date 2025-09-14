@@ -19,79 +19,7 @@ import "prismjs/components/prism-python";
 import "prismjs/components/prism-bash";
 import "prismjs/components/prism-json";
 import "prismjs/components/prism-markdown";
-// Add more Prism languages as needed
-
-// oneDark theme CSS
-const prismOneDark = `
-.prism-one-dark {
-  background: #282c34;
-  color: #abb2bf;
-  border-radius: 0.5em;
-  font-size: 1rem;
-  margin: 1.5em 0;
-  font-family: 'JetBrains Mono', monospace;
-  overflow-x: auto;
-  padding: 1em;
-}
-.prism-one-dark .token.comment,
-.prism-one-dark .token.prolog,
-.prism-one-dark .token.doctype,
-.prism-one-dark .token.cdata {
-  color: #5c6370;
-  font-style: italic;
-}
-.prism-one-dark .token.punctuation,
-.prism-one-dark .token.operator {
-  color: #abb2bf;
-}
-.prism-one-dark .token.property,
-.prism-one-dark .token.tag,
-.prism-one-dark .token.boolean,
-.prism-one-dark .token.number,
-.prism-one-dark .token.constant,
-.prism-one-dark .token.symbol,
-.prism-one-dark .token.deleted {
-  color: #e06c75;
-}
-.prism-one-dark .token.selector,
-.prism-one-dark .token.attr-name,
-.prism-one-dark .token.string,
-.prism-one-dark .token.char,
-.prism-one-dark .token.builtin,
-.prism-one-dark .token.inserted {
-  color: #98c379;
-}
-.prism-one-dark .token.function,
-.prism-one-dark .token.class-name {
-  color: #61afef;
-}
-.prism-one-dark .token.variable {
-  color: #d19a66;
-}
-.prism-one-dark .token.keyword,
-.prism-one-dark .token.control,
-.prism-one-dark .token.directive,
-.prism-one-dark .token.unit {
-  color: #c678dd;
-}
-.prism-one-dark .token.bold,
-.prism-one-dark .token.important {
-  font-weight: bold;
-}
-.prism-one-dark .token.italic {
-  font-style: italic;
-}
-.prism-one-dark .token.entity {
-  cursor: help;
-}
-`;
-
-if (typeof window !== "undefined" && !document.getElementById("prism-one-dark-style")) {
-  const style = document.createElement("style");
-  style.id = "prism-one-dark-style";
-  style.innerHTML = prismOneDark;
-  document.head.appendChild(style);
-}
+import "@/../public/prism-one-dark.css";
 // ------------------------------------------------
 
 export async function generateStaticParams() {
@@ -104,24 +32,23 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
   const { data, content } = matter(raw);
   return (
     <div
-      className="min-h-screen text-zinc-100 relative"
-      style={{ fontFamily: 'JetBrains Mono, monospace', cursor: 'url(/cursor.svg), pointer' }}
+      className="min-h-screen text-zinc-100 relative font-['JetBrains_Mono',monospace] cursor-pointer"
+      style={{ cursor: 'url(/cursor.svg), pointer' }}
     >
       <ResponsiveHeader />
       <BackgroundFX />
       <main className="relative py-16">
         <div className="mx-auto max-w-3xl px-4">
-          <Link href="/blog" className="text-indigo-400 underline mb-6 inline-block" style={{ fontFamily: 'JetBrains Mono, monospace' }}>← Back to blog</Link>
-          <h1 className="text-2xl font-bold mb-4" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{data.title}</h1>
-          <div className="border border-neutral-800 bg-zinc-900 rounded-2xl p-6 mb-24 shadow-lg" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-            <div className="mb-4 text-lg text-zinc-200" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+          <Link href="/blog" className="text-indigo-400 underline mb-6 inline-block font-['JetBrains_Mono',monospace]">← Back to blog</Link>
+          <h1 className="text-2xl font-bold mb-4 font-['JetBrains_Mono',monospace]">{data.title}</h1>
+          <div className="border border-neutral-800 bg-zinc-900 rounded-2xl p-6 mb-24 shadow-lg font-['JetBrains_Mono',monospace]">
+            <div className="mb-4 text-lg text-zinc-200 font-['JetBrains_Mono',monospace]">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
                   h2: (props) => (
                     <h2
-                      className="text-xl font-bold underline mb-6 mt-10 text-indigo-300"
-                      style={{ fontFamily: 'JetBrains Mono, monospace' }}
+                      className="text-xl font-bold underline mb-6 mt-10 text-indigo-300 font-['JetBrains_Mono',monospace]"
                       {...props}
                     />
                   ),
@@ -129,25 +56,24 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                     <div className="my-8" />
                   ),
                   ul: (props) => (
-                    <ul className="list-disc pl-6 mb-6" style={{ fontFamily: 'JetBrains Mono, monospace' }} {...props} />
+                    <ul className="list-disc pl-6 mb-6 font-['JetBrains_Mono',monospace]" {...props} />
                   ),
                   ol: (props) => (
-                    <ol className="list-decimal pl-6 mb-6" style={{ fontFamily: 'JetBrains Mono, monospace' }} {...props} />
+                    <ol className="list-decimal pl-6 mb-6 font-['JetBrains_Mono',monospace]" {...props} />
                   ),
                   li: (props) => (
-                    <li className="mb-2" style={{ fontFamily: 'JetBrains Mono, monospace' }} {...props} />
+                    <li className="mb-2 font-['JetBrains_Mono',monospace]" {...props} />
                   ),
                   a: (props) => (
                     <a
                       {...props}
                       className={
-                        props.href === "https://github.com/Giuseppe552/ats-helper"
+                        (props.href === "https://github.com/Giuseppe552/ats-helper"
                           ? "inline-block mt-6 px-6 py-2 rounded-xl bg-indigo-500 text-black font-semibold shadow hover:bg-indigo-400 transition text-base text-center"
-                          : "text-indigo-400 underline hover:text-indigo-300 transition"
+                          : "text-indigo-400 underline hover:text-indigo-300 transition") + " font-['JetBrains_Mono',monospace]"
                       }
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontFamily: 'JetBrains Mono, monospace' }}
                     >
                       {props.children}
                     </a>
@@ -165,15 +91,6 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                       }
                       return (
                         <pre className={`prism-one-dark language-${lang}`}
-                          style={{
-                            borderRadius: "0.5em",
-                            fontSize: "1rem",
-                            background: "#282c34",
-                            margin: "1.5em 0",
-                            fontFamily: "'JetBrains Mono', monospace",
-                            overflowX: "auto",
-                            padding: "1em"
-                          }}
                         >
                           <code
                             className={`language-${lang}`}
@@ -184,13 +101,7 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                     }
                     return (
                       <code
-                        className={className}
-                        style={{
-                          background: "#222",
-                          padding: "2px 6px",
-                          borderRadius: "0.3em",
-                          fontFamily: "'JetBrains Mono', monospace",
-                        }}
+                        className={className + " bg-[#222] px-2 py-1 rounded font-['JetBrains_Mono',monospace]"}
                         {...props}
                       >
                         {children}
