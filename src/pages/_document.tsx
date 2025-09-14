@@ -1,11 +1,15 @@
 import Document, { Html, Head, Main, NextScript, DocumentContext } from 'next/document';
-import crypto from 'crypto';
+import cookie from 'cookie';
 
 export default class MyDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
     const initialProps = await Document.getInitialProps(ctx);
-    // Generate a random nonce for each request
-    const nonce = crypto.randomBytes(16).toString('base64');
+    // Parse nonce from cookie (set by middleware)
+    let nonce = '';
+    if (ctx.req?.headers?.cookie) {
+      const cookies = cookie.parse(ctx.req.headers.cookie);
+      nonce = cookies["nonce"] || '';
+    }
     return { ...initialProps, nonce };
   }
 
@@ -14,8 +18,7 @@ export default class MyDocument extends Document {
     return (
       <Html>
         <Head>
-          {/* Inject nonce into all style and script tags */}
-          <meta httpEquiv="Content-Security-Policy" content={`default-src 'self'; script-src 'self' https://www.googletagmanager.com 'nonce-${nonce}'; style-src 'self' 'nonce-${nonce}'; object-src 'none'; base-uri 'self';`} />
+          {/* Use nonce on any custom inline style or script tags if needed */}
         </Head>
         <body>
           <Main />
