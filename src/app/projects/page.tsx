@@ -62,7 +62,7 @@ export default async function ProjectsPage() {
 
 
   return (
-    <div className="min-h-screen text-zinc-100 relative" style={{fontFamily:'JetBrains Mono, monospace'}}>
+  <div className="min-h-screen text-zinc-100 relative font-['JetBrains_Mono',monospace]">
   <BackgroundFX scanlinePosition="none" />
       {/* Grid overlay to match homepage */}
       <div className="pointer-events-none fixed inset-0 -z-10 [mask-image:radial-gradient(ellipse_at_center,black,transparent_65%)] opacity-25">

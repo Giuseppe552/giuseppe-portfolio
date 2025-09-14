@@ -1,27 +1,27 @@
-import matter from "gray-matter";
-import React from "react";
 import Link from "next/link";
+import matter from "gray-matter";
 import ResponsiveHeader from "@/components/ResponsiveHeader";
 import BackgroundFX from "@/components/BackgroundFX";
 import SiteFooter from "@/components/SiteFooter";
 import { readBlogFile, listBlogSlugs } from "@/lib/safeFs";
+import BlogList, { BlogPost } from "../../components/BlogList";
 
-export const metadata = {
-  title: "Blog – Giuseppe Giona",
-};
-
-function getBlogPosts() {
+function getBlogPosts(): BlogPost[] {
   const slugs = listBlogSlugs();
   return slugs.map(slug => {
     const raw = readBlogFile(slug);
     const { data, content } = matter(raw);
+    let dateStr = "";
+    if (typeof data.date === "object" && data.date instanceof Date) {
+      dateStr = data.date.toISOString().slice(0, 10);
+    } else if (typeof data.date === "string") {
+      const d = new Date(data.date);
+      dateStr = isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
+    }
     return {
       slug,
       title: data.title || slug,
-      date:
-        typeof data.date === "object" && data.date instanceof Date
-          ? data.date.toISOString().slice(0, 10)
-          : String(data.date || ""),
+      date: dateStr,
       tags: data.tags || [],
       repo: data.repo || "",
       content,
@@ -32,30 +32,11 @@ function getBlogPosts() {
 export default function BlogPage() {
   const posts = getBlogPosts();
   return (
-    <div
-      className="min-h-screen text-zinc-100 relative"
-      style={{ fontFamily: 'JetBrains Mono, monospace', cursor: 'url(/cursor.svg), pointer' }}
-    >
+    <div className="min-h-screen text-zinc-100 relative font-['JetBrains_Mono',monospace] cursor-pointer">
       <ResponsiveHeader />
       <BackgroundFX />
-      <main className="relative py-16">
-        <div className="mx-auto max-w-3xl px-4">
-          <h1 className="text-2xl font-bold mb-8" style={{ fontFamily: 'JetBrains Mono, monospace' }}>Blog</h1>
-          <div className="space-y-8">
-            {posts.map(post => (
-              <a
-                key={post.slug}
-                href={`/blog/${post.slug}`}
-                className="block border border-neutral-800 bg-zinc-900 rounded-2xl p-6 shadow-lg hover:border-indigo-500 transition"
-                style={{ fontFamily: 'JetBrains Mono, monospace' }}
-              >
-                <h2 className="text-xl font-semibold text-indigo-400 mb-2" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{post.title}</h2>
-                <div className="text-zinc-400 text-sm mb-2" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{post.date}</div>
-                <div className="text-zinc-200 text-base line-clamp-3" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{post.content.slice(0, 180)}...</div>
-              </a>
-            ))}
-          </div>
-        </div>
+      <main>
+        <BlogList posts={posts} />
       </main>
       {/* Contact section - matches homepage/projects */}
       <section id="contact" className="border-t border-zinc-800 mt-16">

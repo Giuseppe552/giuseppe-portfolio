@@ -10,7 +10,6 @@ export default class MyDocument extends Document {
   }
 
   render() {
-    // @ts-ignore
     const nonce = this.props.nonce;
     return (
       <Html>

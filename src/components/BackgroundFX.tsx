@@ -65,10 +65,10 @@ export default function BackgroundFX({ scanlinePosition = '20px' }: { scanlinePo
       {/* Hero spotlight */}
       <div
         className="pointer-events-none fixed inset-0 -z-30"
-        style={{ background: "radial-gradient(950px 520px at 20% 26%, rgba(37,99,235,0.14), transparent 62%)" }}
+  className="bg-gradient-to-br from-blue-600/10 to-transparent"
       />
       {/* Back (matrix rain) layer */}
-      <canvas ref={backRef} className="fixed inset-0 w-full h-full z-[-50] opacity-[0.7]" style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',zIndex:-50}} />
+  <canvas ref={backRef} className="fixed inset-0 w-full h-full z-[-50] opacity-[0.7]" />
       {/* Front (sharp) pixel layer - currently unused, but kept for future effects */}
       <canvas ref={frontRef} className="fixed inset-0 -z-28 opacity-[0.22]" />
       {/* Grid overlay */}
@@ -84,7 +84,7 @@ export default function BackgroundFX({ scanlinePosition = '20px' }: { scanlinePo
       </div>
   {/* Scanline - move lower so it's not inside a project box */}
   {scanlinePosition !== 'none' ? (
-    <div className="pointer-events-none fixed left-0 right-0" style={{ bottom: scanlinePosition, position: 'fixed', zIndex: -40, height: '3px', backgroundImage: 'linear-gradient(transparent 50%, #000 50%)', backgroundSize: '100% 3px', opacity: 0.05 }} />
+  <div className="pointer-events-none fixed left-0 right-0 h-[3px] opacity-5 bg-gradient-to-b from-transparent to-black" style={{ bottom: scanlinePosition }} />
   ) : null}
     </React.Fragment>
   );

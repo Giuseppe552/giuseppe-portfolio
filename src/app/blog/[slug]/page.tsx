@@ -33,7 +33,6 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
   return (
     <div
       className="min-h-screen text-zinc-100 relative font-['JetBrains_Mono',monospace] cursor-pointer"
-      style={{ cursor: 'url(/cursor.svg), pointer' }}
     >
       <ResponsiveHeader />
       <BackgroundFX />
@@ -46,6 +45,11 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
+                  p: (props) => (
+                    <p className="mb-5">
+                      {props.children}
+                    </p>
+                  ),
                   h2: (props) => (
                     <h2
                       className="text-xl font-bold underline mb-6 mt-10 text-indigo-300 font-['JetBrains_Mono',monospace]"
@@ -79,7 +83,7 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                     </a>
                   ),
                   // --- NEW: Syntax-highlighted code blocks ---
-                  code({ node, className, children, ...props }) {
+                  code({ className, children, ...props }) {
                     const match = /language-(\w+)/.exec(className || "");
                     if (match) {
                       const lang = match[1];

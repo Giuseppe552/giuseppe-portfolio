@@ -16,8 +16,8 @@ export default function ProjectsScrollBar() {
   return (
     <div className="fixed top-0 left-0 right-0 h-[3px] bg-zinc-900/80 z-50">
       <div
-        className="h-full bg-indigo-500"
-        style={{ width: `${progress}%`, transition: "width 0.08s linear" }}
+        className="h-full bg-indigo-500 transition-[width] duration-75 progress-bar-width"
+        style={{ width: `${progress}%` }}
         aria-hidden
       />
     </div>

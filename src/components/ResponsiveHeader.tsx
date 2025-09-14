@@ -20,6 +20,7 @@ export default function ResponsiveHeader() {
         <nav className="hidden md:flex gap-6 text-sm items-center font-mono">
           <Link href="/projects" className="hover:text-indigo-400 transition">Projects</Link>
           <Link href="/blog" className="hover:text-indigo-400 transition">Blog</Link>
+          <Link href="/tools" className="hover:text-indigo-400 transition">Tools</Link>
         </nav>
       </div>
       {open && (
@@ -27,6 +28,7 @@ export default function ResponsiveHeader() {
           <Link href="/" className="hover:text-indigo-400 transition">Home</Link>
           <Link href="/projects" className="hover:text-indigo-400 transition">Projects</Link>
           <Link href="/blog" className="hover:text-indigo-400 transition">Blog</Link>
+          <Link href="/tools" className="hover:text-indigo-400 transition">Tools</Link>
         </nav>
       )}
     </header>

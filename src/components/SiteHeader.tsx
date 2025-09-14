@@ -17,7 +17,7 @@ export default function SiteHeader() {
           </Link>
           <a href="#contact" className="text-zinc-300 hover:text-white transition-colors">Contact</a>
           <a
-            href="https://calendly.com/giuseppegiona/30min"
+            href="https://calendly.com/contact-giuseppe00/call"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-500 text-black font-medium shadow hover:bg-slate-400 transition"

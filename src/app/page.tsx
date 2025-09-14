@@ -29,7 +29,7 @@ export default function Portfolio() {
   }, []);
 
   return (
-  <div className="min-h-screen text-zinc-100 relative" style={{fontFamily:'JetBrains Mono, monospace', cursor:'url(/cursor.svg), pointer'}}>
+  <div className="min-h-screen text-zinc-100 relative font-['JetBrains_Mono',monospace] cursor-pointer">
     <ResponsiveHeader />
   <BackgroundFX />
 
