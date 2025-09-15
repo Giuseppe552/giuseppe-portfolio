@@ -23,6 +23,15 @@
           "key": "Cross-Origin-Resource-Policy",
           "value": "same-origin"
         }
+          ,
+          {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://trusted.cdn.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+          },
+          {
+            "key": "Permissions-Policy",
+            "value": "geolocation=(), camera=(), microphone=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=(), fullscreen=(), autoplay=(), sync-xhr=(), ambient-light-sensor=(), bluetooth=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), gamepad=(), hid=(), idle-detection=(), local-fonts=(), midi=(), otp-credentials=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), vertical-scroll=(), vr=()"
+          }
       ]
     }
   ]
