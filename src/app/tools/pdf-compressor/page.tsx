@@ -1,10 +1,11 @@
+"use client";
 // TypeScript global declaration for CSP nonce
 declare global {
   interface Window {
     __CSP_NONCE__?: string;
   }
 }
-"use client";
+// ...existing code...
 import Link from "next/link";
 import React, { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
@@ -142,7 +143,7 @@ export default function PDFCompressorPage() {
 
   // UI
   // Get nonce from global window (set by server) or props/context if available
-  const nonce = typeof window !== 'undefined' ? (window.__CSP_NONCE__ || '') : '';
+  // const nonce = typeof window !== 'undefined' ? (window.__CSP_NONCE__ || '') : '';
   return (
     <div className="min-h-screen text-zinc-100 relative font-['JetBrains_Mono',monospace] cursor-pointer">
       <ResponsiveHeader />

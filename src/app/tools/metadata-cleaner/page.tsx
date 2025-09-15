@@ -1,10 +1,11 @@
+"use client";
 // TypeScript global declaration for CSP nonce
 declare global {
   interface Window {
     __CSP_NONCE__?: string;
   }
 }
-"use client";
+// ...existing code...
 import Link from "next/link";
 import React, { useRef, useState } from "react";
 import ResponsiveHeader from "@/components/ResponsiveHeader";
