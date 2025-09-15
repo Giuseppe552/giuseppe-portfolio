@@ -1,3 +1,9 @@
+// TypeScript global declaration for CSP nonce
+declare global {
+  interface Window {
+    __CSP_NONCE__?: string;
+  }
+}
 "use client";
 import Link from "next/link";
 import React, { useRef, useState } from "react";
@@ -179,6 +185,8 @@ async function cleanMetadata(file: File): Promise<Blob | null> {
 
 
 export default function MetadataCleanerPage() {
+  // Get nonce from global window (set by server) or props/context if available
+  const nonce = typeof window !== 'undefined' ? (window.__CSP_NONCE__ || '') : '';
   // Map progress (0-100) to Tailwind width classes (w-[0%] ... w-[100%])
   function getWidthClass(progress: number) {
     const rounded = Math.round(progress / 5) * 5;
@@ -391,7 +399,7 @@ export default function MetadataCleanerPage() {
       </div>
       <SiteFooter />
       {/* SEO/JSON-LD FAQ */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  <script nonce={nonce} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [

@@ -11,7 +11,7 @@ export function middleware(request: NextRequest) {
     "Content-Security-Policy",
     [
       "default-src 'self';", // Only allow same-origin by default
-      `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com;`, // Only allow scripts from self and GTM with nonce
+  `script-src 'self' 'nonce-${nonce}';`, // Only allow scripts from self with nonce
   `style-src 'self' 'nonce-${nonce}';`, // Only allow styles from self with nonce
       "img-src 'self' data: https://trusted.cdn.com;", // Only allow images from self, data URIs, and trusted CDN
   "font-src 'self';", // Only allow fonts from self
