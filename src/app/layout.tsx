@@ -35,8 +35,26 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Read nonce from cookie (set by middleware)
+  let nonce = '';
+  if (typeof window === 'undefined') {
+    // On server, read from cookies
+    const cookies = require('next/headers').cookies();
+    nonce = cookies.get('nonce')?.value || '';
+  } else {
+    // On client, read from window
+    nonce = window.__CSP_NONCE__ || '';
+  }
+
+  // Set window.__CSP_NONCE__ for client hydration
+  const nonceScript = `window.__CSP_NONCE__ = '${nonce}';`;
+
   return (
     <html lang="en">
+      <head>
+        {/* Set nonce on all inline scripts/styles */}
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: nonceScript }} />
+      </head>
       <body>{children}</body>
     </html>
   );

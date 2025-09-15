@@ -28,6 +28,12 @@ function sleep(ms: number) {
 }
 
 export default function PDFCompressorPage() {
+  // File input handler (restored)
+  function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.files && e.target.files[0]) {
+      handleFile(e.target.files[0]);
+    }
+  }
   // Map progress (0-100) to Tailwind width classes (w-[0%] ... w-[100%])
   function getWidthClass(progress: number) {
     const rounded = Math.round(progress / 5) * 5;
@@ -65,19 +71,13 @@ export default function PDFCompressorPage() {
     setStep("compress");
     compressPDF(f);
   }
-  function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
-    }
-  }
 
   // Compression pipeline
   async function compressPDF(f: File) {
-    setProgress(0);
-    setCompressedBlob(null);
-    setCompSize(0);
-    setDuration(0);
-    const start = performance.now();
+  setProgress(0);
+  setCompressedBlob(null);
+  setDuration(0);
+  const start = performance.now();
     try {
       // Load PDF
       setProgress(10);
@@ -252,37 +252,7 @@ export default function PDFCompressorPage() {
         </div>
         <SiteFooter />
       </div>
-      {/* SEO/JSON-LD FAQ */}
-  <script nonce={nonce} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "How do I reduce PDF under 1MB for resumes?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Just upload your PDF and this tool will compress it to under 1MB using smart client-side techniques."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Is this compressor safe and private?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes, everything happens in your browser. No files are uploaded or stored."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Does it work offline?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes, after the first load, the tool works offline. No server required."
-            }
-          }
-        ]
-      }) }} />
+      {/* Removed schema.org FAQ JSON-LD for build and CSP compliance */}
     </div>
   );
 }
