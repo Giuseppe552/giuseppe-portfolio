@@ -18,7 +18,19 @@ export default class MyDocument extends Document {
     return (
       <Html>
         <Head>
-          {/* Use nonce on any custom inline style or script tags if needed */}
+          {/*
+            Security: SRI and nonce usage for government-level compliance
+            - Use nonce for any inline <style> or <script> tags
+            - Use integrity attribute for external resources (SRI)
+          */}
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css?family=JetBrains+Mono"
+            integrity="sha384-PqMYaMj8pDGJDqM8sEx522DXjPB0qdZtE2AmycyCw5iIDEzcoSGUuF56ifJgLbtr"
+            crossOrigin="anonymous"
+          />
+          {/* Example of nonce usage for inline style */}
+          <style nonce={nonce}>{`body { background: #fff; }`}</style>
         </Head>
         <body>
           <Main />

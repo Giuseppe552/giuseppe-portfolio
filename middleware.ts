@@ -2,19 +2,54 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
 export function middleware(request: NextRequest) {
-  // Generate a secure nonce per request
   const nonce = crypto.randomBytes(16).toString("base64");
   const response = NextResponse.next();
 
-  // Set a strong CSP header with nonce (for hydration and style/script security)
+  // Content Security Policy (CSP): Strict, production-ready, no unsafe-inline/eval
+  // Only allow trusted domains and dynamic nonce for inline scripts/styles
   response.headers.set(
     "Content-Security-Policy",
-    `default-src 'self'; script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com; style-src 'self' 'nonce-${nonce}'; object-src 'none'; base-uri 'self';`
+    [
+      "default-src 'self';", // Only allow same-origin by default
+      `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com;`, // Only allow scripts from self and GTM with nonce
+      `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com;`, // Only allow styles from self and Google Fonts with nonce
+      "img-src 'self' data: https://trusted.cdn.com;", // Only allow images from self, data URIs, and trusted CDN
+      "font-src 'self' https://fonts.gstatic.com;", // Only allow fonts from self and Google Fonts
+      "connect-src 'self';", // Only allow XHR/fetch from self
+      "object-src 'none';", // Prevent plugin/object embedding
+      "base-uri 'self';", // Only allow base tag from self
+      "form-action 'self';", // Only allow forms to submit to self
+      "frame-ancestors 'none';" // Prevent clickjacking
+    ].join(" ")
   );
 
-  // Pass nonce to your app via a cookie (readable in _document.tsx)
+  // Referrer Policy: Prevent leaking URLs to third parties
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+
+  // X-Content-Type-Options: Prevent MIME type sniffing
+  response.headers.set("X-Content-Type-Options", "nosniff");
+
+  // X-Frame-Options: Prevent clickjacking
+  response.headers.set("X-Frame-Options", "DENY");
+
+  // Cross-Origin Resource Policy (CORP): Prevent cross-origin resource leaks
+  response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
+
+  // HSTS: Force HTTPS, prevent SSL stripping
+  response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+
+    // Permissions-Policy: Disable unused browser features
+    response.headers.set("Permissions-Policy", "geolocation=(), camera=(), microphone=()");
+
+    // COOP: Cross-Origin Opener Policy for isolation
+    response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
+
+    // COEP: Cross-Origin Embedder Policy for isolation
+    response.headers.set("Cross-Origin-Embedder-Policy", "require-corp");
+
+  // Pass nonce to app via cookie for use in _document.tsx
   response.cookies.set("nonce", nonce, {
-    httpOnly: false, // Must be false so _document.tsx can read it!
+    httpOnly: false,
     secure: true,
     sameSite: "strict",
     path: "/"
