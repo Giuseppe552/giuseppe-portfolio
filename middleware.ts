@@ -7,21 +7,35 @@ export function middleware(request: NextRequest) {
 
   // Content Security Policy (CSP): Strict, production-ready, no unsafe-inline/eval
   // Only allow trusted domains and dynamic nonce for inline scripts/styles
-  response.headers.set(
-    "Content-Security-Policy",
-    [
-      "default-src 'self';", // Only allow same-origin by default
-  `script-src 'self' 'nonce-${nonce}';`, // Only allow scripts from self with nonce
-  `style-src 'self' 'nonce-${nonce}';`, // Only allow styles from self with nonce
-      "img-src 'self' data: https://trusted.cdn.com;", // Only allow images from self, data URIs, and trusted CDN
-  "font-src 'self';", // Only allow fonts from self
-      "connect-src 'self';", // Only allow XHR/fetch from self
-      "object-src 'none';", // Prevent plugin/object embedding
-      "base-uri 'self';", // Only allow base tag from self
-      "form-action 'self';", // Only allow forms to submit to self
-      "frame-ancestors 'none';" // Prevent clickjacking
-    ].join(" ")
-  );
+    response.headers.set("Content-Security-Policy",
+      [
+        "default-src 'self';",
+        `script-src 'self'${nonce ? ` 'nonce-${nonce}'` : ''}
+          'sha256-2bivjbhWhUbGj5hb5CoA3mK7cKy4bKdcJbMd5BHPwaY='
+          'sha256-Kfksv9pKQ+0rL48m3vXcR8qP6A8T5QmK7b4b1wQw8gA='
+          'sha256-4qE8nZohqI24JYh0mQ4n4iFyu9sZRfEywfBFwuTSY8s='
+          'sha256-6HfH4M2E4jVskJW5szs='
+          'sha256-k8yBbyshvdqnfS6rfnCzFcrbHfD8N2Q0evQbplfHwEs='
+          'sha256-LcsuMlDkprrt6X2iLP4iYNhW0Nq8AbgtoZxVK3s='
+          'sha256-5pmuzeEywVn6f1guSrLnvb+ac4Q0AHV4lUf600='
+          'sha256-0BTR3NjvCV4Bq7dZ5a2pA2jxCcCEy1M3OT/LYKeo='
+          'sha256-mj8t2X9RqSmWX4Zc5FVU0L7SJrIZ3pKEVHJ+3as='
+          'sha256-yHPRb8kCz8X7evZ4GkMqtKqfa0erowbKfV8HqWAtA='
+          'sha256-7na0ytBYX0B5WQm5Z1f4hB9p2tz+2Hi9R2pA='
+          'sha256-C-EK0vCdzUrqMTfa5wDBpa7EosxZ7/jeu2JZ23a='
+          'sha256-8Vj3S5Nx0H08HZxKOARIBUz4BUo4k6Wiospbrnsp=';`,
+        `style-src 'self'${nonce ? ` 'nonce-${nonce}'` : ''}
+          'sha256-Kfksv9pKQ+0rL48m3vXcR8qP6A8T5QmK7b4b1wQw8gA='
+          'sha256-4qE8nZohqI24JYh0mQ4n4iFyu9sZRfEywfBFwuTSY8s=';`,
+        "img-src 'self' data:;",
+        "font-src 'self';",
+        "connect-src 'self';",
+        "frame-src 'none';",
+        "object-src 'none';",
+        "base-uri 'self';",
+        "form-action 'self';"
+      ].join(" ")
+    );
 
   // Referrer Policy: Prevent leaking URLs to third parties
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
