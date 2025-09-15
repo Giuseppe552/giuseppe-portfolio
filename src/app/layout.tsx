@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { cookies } from 'next/headers';
 import "./globals.css";
 
 export const metadata: Metadata = {
