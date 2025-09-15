@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from 'next/headers';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -34,26 +35,12 @@ export const viewport: Viewport = {
   themeColor: "#0EA5E9",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // Read nonce from cookie (set by middleware)
-  let nonce = '';
-  if (typeof window === 'undefined') {
-    // On server, read from cookies
-    const cookies = require('next/headers').cookies();
-    nonce = cookies.get('nonce')?.value || '';
-  } else {
-    // On client, read from window
-    nonce = window.__CSP_NONCE__ || '';
-  }
-
-  // Set window.__CSP_NONCE__ for client hydration
-  const nonceScript = `window.__CSP_NONCE__ = '${nonce}';`;
-
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
-        {/* Set nonce on all inline scripts/styles */}
-        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: nonceScript }} />
+        <title>Giuseppe Giona Portfolio</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body>{children}</body>
     </html>
