@@ -2,15 +2,15 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Giuseppe Giona — Systems & Security",
+  title: "Giuseppe Giona | Systems Engineer, Security Automation Expert, Clean Code Advocate",
   description:
-    "Mathematics grad building clean systems. Security-curious, automation-heavy. EN/ITA.",
+    "Giuseppe Giona is a systems engineer and security automation specialist with a mathematics background. Expert in building robust, scalable systems, cybersecurity, DevOps, and automation for businesses and developers. Discover resources, blog posts, and projects on clean code, privacy, and IT best practices. Serving clients worldwide in English and Italian.",
   metadataBase: new URL("https://giuseppegiona.com"),
   alternates: { canonical: "/", languages: { en: "/?lang=en", it: "/?lang=it" } },
   openGraph: {
-    title: "Giuseppe Giona — Systems & Security",
+    title: "Giuseppe Giona | Systems Engineer, Security Automation Expert, Clean Code Advocate",
     description:
-      "Clean systems, security mindset, automation. EN/ITA.",
+      "Systems engineering, cybersecurity, DevOps, automation, clean code, privacy, IT best practices. English and Italian.",
     url: "https://giuseppegiona.com",
     siteName: "Giuseppe Giona",
     images: ["/og.png"],
@@ -19,8 +19,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Giuseppe Giona — Systems & Security",
-    description: "Clean systems, security mindset, automation.",
+  title: "Giuseppe Giona | Systems Engineer, Security Automation Expert, Clean Code Advocate",
+  description: "Systems engineering, cybersecurity, DevOps, automation, clean code, privacy, IT best practices. English and Italian.",
     images: ["/og.png"],
   },
   icons: {

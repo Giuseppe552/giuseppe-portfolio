@@ -12,9 +12,9 @@ export function middleware(request: NextRequest) {
     [
       "default-src 'self';", // Only allow same-origin by default
       `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com;`, // Only allow scripts from self and GTM with nonce
-      `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com;`, // Only allow styles from self and Google Fonts with nonce
+  `style-src 'self' 'nonce-${nonce}';`, // Only allow styles from self with nonce
       "img-src 'self' data: https://trusted.cdn.com;", // Only allow images from self, data URIs, and trusted CDN
-      "font-src 'self' https://fonts.gstatic.com;", // Only allow fonts from self and Google Fonts
+  "font-src 'self';", // Only allow fonts from self
       "connect-src 'self';", // Only allow XHR/fetch from self
       "object-src 'none';", // Prevent plugin/object embedding
       "base-uri 'self';", // Only allow base tag from self

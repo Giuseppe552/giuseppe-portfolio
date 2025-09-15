@@ -6,6 +6,22 @@ import { GHRepo, getPortfolioRepos } from "@/lib/github";
 
 export const metadata = {
   title: "Project Details – Giuseppe Giona",
+  description: "Detailed overview of a selected software engineering, automation, or security project by Giuseppe Giona. Includes features, technologies, and links to source code and documentation.",
+  openGraph: {
+    title: "Project Details – Giuseppe Giona",
+    description: "Detailed overview of a selected software engineering, automation, or security project by Giuseppe Giona. Includes features, technologies, and links to source code and documentation.",
+    url: "https://giuseppegiona.com/projects/[repo]",
+    siteName: "Giuseppe Giona Portfolio",
+    images: ["/og.png"],
+    type: "article",
+    locale: "en_GB",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Project Details – Giuseppe Giona",
+    description: "Detailed overview of a selected software engineering, automation, or security project by Giuseppe Giona. Includes features, technologies, and links to source code and documentation.",
+    images: ["/og.png"],
+  },
 };
 
 async function fetchReadme(repo: string): Promise<string | null> {

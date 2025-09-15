@@ -52,10 +52,6 @@ export default class MyDocument extends Document {
             - Use integrity attribute for external resources (SRI)
           */}
           <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=JetBrains+Mono"
-            integrity="sha384-PqMYaMj8pDGJDqM8sEx522DXjPB0qdZtE2AmycyCw5iIDEzcoSGUuF56ifJgLbtr"
-            crossOrigin="anonymous"
           />
           {/* Example of nonce usage for inline style */}
           <style nonce={nonce}>{`body { background: #fff; }`}</style>
