@@ -18,6 +18,9 @@ const eslintConfig = [
     },
     rules: {
       ...security.configs.recommended.rules,
+      // Forbid inline styles in JSX
+      'react/style-prop-object': 'error',
+      'no-inline-styles/no-inline-styles': 'error',
     },
   },
   {

@@ -22,6 +22,11 @@ function sleep(ms: number) {
 }
 
 export default function PDFCompressorPage() {
+  // Map progress (0-100) to Tailwind width classes (w-[0%] ... w-[100%])
+  function getWidthClass(progress: number) {
+    const rounded = Math.round(progress / 5) * 5;
+    return `w-[${rounded}%]`;
+  }
   const [step, setStep] = useState<"upload" | "compress" | "download">("upload");
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>("");
@@ -185,8 +190,7 @@ export default function PDFCompressorPage() {
             </div>
             <div className="w-full bg-slate-800 rounded-xl h-4 overflow-hidden mb-2">
               <div
-                className="bg-indigo-500 h-4 transition-all progress-bar"
-                style={{ width: `${progress}%` }}
+                className={`bg-indigo-500 h-4 transition-all progress-bar ${getWidthClass(progress)}`}
                 aria-valuenow={progress}
                 aria-valuemin={0}
                 aria-valuemax={100}

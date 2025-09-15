@@ -3,6 +3,13 @@ import React from "react";
 
 export default function ProjectsScrollBar() {
   const [progress, setProgress] = React.useState(0);
+
+  // Map progress (0-100) to Tailwind width classes (w-[0%] ... w-[100%])
+  function getWidthClass(progress: number) {
+    // Round to nearest 5 for class mapping
+    const rounded = Math.round(progress / 5) * 5;
+    return `w-[${rounded}%]`;
+  }
   React.useEffect(() => {
     const onScroll = () => {
       const h = document.documentElement;
@@ -16,8 +23,7 @@ export default function ProjectsScrollBar() {
   return (
     <div className="fixed top-0 left-0 right-0 h-[3px] bg-zinc-900/80 z-50">
       <div
-        className="h-full bg-indigo-500 transition-[width] duration-75 progress-bar"
-        style={{ width: `${progress}%` }}
+        className={`h-full bg-indigo-500 transition-[width] duration-75 progress-bar ${getWidthClass(progress)}`}
         aria-hidden
       />
     </div>
