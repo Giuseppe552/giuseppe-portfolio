@@ -4,6 +4,9 @@ date: 2025-08-01
 tags: [side-projects, certifications, career, portfolio, learning, advice, seo]
 ---
 
+![Certifications Versus Side Projects](/CertificationsVsSideProjects.png)
+
+
 When you’re trying to break into tech, it’s easy to feel pressure to collect certifications. They look official, they come with logos from big companies, and they give you something to put on your CV.
 
 But I’ve learned that side projects often carry more weight — especially when you’re looking for your first role. Projects show that you can actually apply your skills in the real world, not just pass a test.
@@ -24,13 +27,15 @@ When recruiters or hiring managers see a GitHub profile with working projects, s
 
 Here’s how they compare from the perspective of someone still breaking into the industry:
 
-|                     | Certifications                | Side Projects                   |
+|  Criteria                   | Certifications (Pros & Cons)               | Side Projects (Pros & Cons)                   |
 |---------------------|------------------------------|---------------------------------|
 | **Proof of knowledge**      | ✅ Yes (theory + exam)      | ✅ Yes (hands-on application)    |
-| **Shows problem-solving**   | ❌ Limited                  | ✅ Absolutely                   |
-| **Cost**                   | 💰 Expensive                | 🪴 Free or low-cost             |
+| **Shows problem-solving**   | ❌ Limited                  | ✅ Strong evidence                   |
+| **Cost**                   | 💰 Expensive                | 🪴 Usually free or low-cost             |
 | **Portfolio value**        | 🤏 Line on CV               | 🌟 Tangible proof on GitHub/website |
-| **Learning depth**         | 📚 Structured, predictable  | 🛠️ Practical, messy, deeper     |
+| **Learning depth**         | 📚 Structured but predictable  | 🛠️ Practical, messy, deeper     |
+
+![Bar chart showing recruiters value projects and prortfolios more than certifications alone](/WhatImpressesRecruitersMore1.png)
 
 ## Finding the Balance
 
@@ -41,3 +46,22 @@ That’s not to say certifications aren’t useful — they can help with credib
 If you’re deciding whether to spend the weekend chasing another certificate or building a small app, I’d say go for the app. Even a basic project shows initiative, helps you learn faster, and gives recruiters something real to look at.
 
 👉 Side projects aren’t just practice — they’re your way of proving you’re ready.
+
+
+
+## Common Questions: Certifications vs. Side Projects
+
+1. Do certifications help you get a job in tech?
+Yes — especially in cloud, security, or niche areas. But for entry-level dev roles, projects often carry more weight because they show applied skills.
+
+2. Can side projects replace certifications?
+For many junior roles, yes. A portfolio with real projects demonstrates problem-solving better than certificates alone.
+
+3. What’s the best balance?
+1–2 relevant certifications + a GitHub portfolio of practical projects is an ideal mix.
+
+4. Do recruiters actually check GitHub?
+Yes. A clear, active GitHub with documentation often gets more attention than a long list of certificates.
+
+5. Which projects should beginners build?
+Start small: budget tracker, resume parser, dashboard, or automation script. They’re simple but impactful.

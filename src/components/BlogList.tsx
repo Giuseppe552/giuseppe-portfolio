@@ -30,7 +30,7 @@ const BlogList: React.FC<BlogListProps> = ({ posts }) => {
     <div className="mx-auto max-w-3xl px-4">
       <div className="mt-12 mb-10">
         <Typewriter
-          text="This blog is my learning journal. I share coding projects, security experiments, and career reflections — not as an expert, but as someone still learning and improving every day. My hope is that by documenting the process, others can learn alongside me and avoid the mistakes I’ve made."
+          text= "T h is blog is my learning journal. I share coding projects, security experiments, career reflections and more — not as an expert, but as someone still learning and improving every day. My hope is that by documenting the process, others can learn alongside me and avoid the mistakes I’ve made."
           className="text-zinc-300 text-base md:text-lg font-mono"
         />
       </div>

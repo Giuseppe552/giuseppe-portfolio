@@ -2,6 +2,8 @@ import PortfolioClient from "@/app/PortfolioClient";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import Layout from "../components/Layout";
+import { BlogPost } from "../components/BlogList";
 
 /** ──────────────────────────────────────────────────────────────────────────
  *  Page
@@ -10,12 +12,12 @@ import matter from "gray-matter";
  *  ────────────────────────────────────────────────────────────────────────── */
 
 export default function Portfolio() {
-  // Server-side logic to get latest blog post
+  // Server-side logic to get latest blog posts
   const BLOG_DIR = path.join(process.cwd(), "src", "app", "blog");
   const files = fs.readdirSync(BLOG_DIR).filter(f => f.endsWith(".md"));
-  let blogPost = null;
+  let blogPosts: BlogPost[] = [];
   if (files.length) {
-    const posts = files.map(f => {
+    blogPosts = files.map(f => {
       const raw = fs.readFileSync(path.join(BLOG_DIR, f), "utf8");
       const { data, content } = matter(raw);
       let dateStr = "";
@@ -34,11 +36,16 @@ export default function Portfolio() {
         content,
       };
     });
-    posts.sort((a, b) => b.date.localeCompare(a.date));
-    const post = posts[0];
-    blogPost = post;
+    blogPosts.sort((a, b) => b.date.localeCompare(a.date));
   }
-  return <PortfolioClient blogPost={blogPost} />;
+  return (
+    <Layout
+      title="Welcome to Giuseppe's Portfolio"
+      description="Explore projects, blogs, and tools by Giuseppe."
+    >
+      <PortfolioClient blogPost={blogPosts} />
+    </Layout>
+  );
 }
 
 

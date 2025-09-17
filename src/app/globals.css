@@ -63,3 +63,107 @@ code {
   color: inherit;
   font-family: inherit;
 }
+
+/* === Custom Animations for Feature Cards === */
+@keyframes float-x-a {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-8px) translateX(6px); }
+  50% { transform: translateY(6px) translateX(-8px); }
+  75% { transform: translateY(-4px) translateX(4px); }
+}
+@keyframes float-x-b {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  20% { transform: translateY(-10px) translateX(8px); }
+  50% { transform: translateY(8px) translateX(-10px); }
+  80% { transform: translateY(-6px) translateX(6px); }
+}
+@keyframes float-x-c {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  30% { transform: translateY(-6px) translateX(10px); }
+  60% { transform: translateY(10px) translateX(-6px); }
+  90% { transform: translateY(-8px) translateX(8px); }
+}
+@keyframes float-x-d {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  15% { transform: translateY(-12px) translateX(4px); }
+  55% { transform: translateY(4px) translateX(-12px); }
+  85% { transform: translateY(-10px) translateX(10px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 16px 4px #6366f1cc, 0 1.5px 8px 0 #6366f133; }
+  50% { box-shadow: 0 0 32px 8px #818cf8cc, 0 2px 16px 0 #6366f155; }
+}
+
+@keyframes sheen-move {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Animation Utilities */
+.animate-float-a {
+  animation: float-x-a 6s ease-in-out infinite;
+  will-change: transform;
+}
+.animate-float-b {
+  animation: float-x-b 7s ease-in-out infinite;
+  will-change: transform;
+}
+.animate-float-c {
+  animation: float-x-c 8s ease-in-out infinite;
+  will-change: transform;
+}
+.animate-float-d {
+  animation: float-x-d 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+.animate-glow {
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+.sheen {
+  position: relative;
+  overflow: hidden;
+}
+.sheen::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.12) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: sheen-move 2.8s linear infinite;
+}
+
+/* Pause animation on hover */
+.hover\:paused:hover {
+  animation-play-state: paused !important;
+}
+
+/* Accessibility: Disable animations for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-a, .animate-float-b, .animate-float-c, .animate-float-d, .animate-glow, .sheen::before {
+    animation: none !important;
+  }
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: linear-gradient(to bottom, transparent, rgba(0, 255, 0, 0.2));
+  animation: matrix-fall 5s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes matrix-fall {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}

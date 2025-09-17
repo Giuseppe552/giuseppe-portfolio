@@ -5,7 +5,6 @@ import Link from "next/link";
 import BackgroundFX from "@/components/BackgroundFX";
 import { Mail, TerminalSquare, Shield, Bolt, Globe2 } from "lucide-react";
 import { motion } from "framer-motion";
-import ResponsiveHeader from "@/components/ResponsiveHeader";
 
 interface BlogPost {
   title: string;
@@ -14,7 +13,7 @@ interface BlogPost {
   slug: string;
 }
 
-export default function PortfolioClient({ blogPost }: { blogPost: BlogPost | null }) {
+export default function PortfolioClient({ blogPost }: { blogPost: BlogPost[] | null }) {
   const [progress, setProgress] = useState(0);
   const [lang] = useState<"EN" | "ITA">("EN");
 
@@ -31,7 +30,6 @@ export default function PortfolioClient({ blogPost }: { blogPost: BlogPost | nul
 
   return (
     <div className="min-h-screen text-zinc-100 relative font-['JetBrains_Mono',monospace] cursor-pointer">
-      <ResponsiveHeader />
       <BackgroundFX />
       {/* Top progress bar */}
       <div className="fixed top-0 left-0 right-0 h-[3px] bg-slate-800 z-50">
@@ -102,57 +100,67 @@ export default function PortfolioClient({ blogPost }: { blogPost: BlogPost | nul
         </div>
       </section>
 
-      {/* Value props */}
-      <section className="py-16 bg-slate-900">
+      {/* Value props - redesigned as animated cards */}
+      <section className="py-16">
         <div className="mx-auto max-w-6xl px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="flex flex-col gap-4">
-              <div className="p-6 bg-zinc-800 rounded-2xl shadow-md">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-indigo-500 rounded-full">
-                    <Shield className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">Security First</h3>
-                    <p className="text-zinc-400 text-sm mt-1">I prioritize security in all my projects, ensuring your data is safe.</p>
-                  </div>
-                </div>
+          <div
+            className="flex flex-col gap-6 md:flex-row md:gap-6 flex-wrap lg:flex-nowrap justify-center items-stretch"
+          >
+            {/* Security First */}
+            <div
+              className="group flex-1 min-w-[260px] max-w-full rounded-xl backdrop-blur p-6 shadow-md border border-indigo-500 transition-all duration-300 cursor-pointer"
+              tabIndex={0}
+              aria-label="Security First"
+            >
+              <div className="flex items-center gap-4 mb-2">
+                <span className="p-3 rounded-full border border-indigo-500 shadow-none">
+                  <Shield className="w-6 h-6 text-white" />
+                </span>
+                <h3 className="text-white font-semibold text-lg mb-0">Security First</h3>
               </div>
-              <div className="p-6 bg-zinc-800 rounded-2xl shadow-md">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-indigo-500 rounded-full">
-                    <Bolt className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">Performance Obsessed</h3>
-                    <p className="text-zinc-400 text-sm mt-1">I optimize for speed and efficiency, delivering top-notch performance.</p>
-                  </div>
-                </div>
-              </div>
+              <p className="text-slate-300 text-sm">I prioritize security in all my projects, ensuring your data is safe.</p>
             </div>
-            <div className="flex flex-col gap-4">
-              <div className="p-6 bg-zinc-800 rounded-2xl shadow-md">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-indigo-500 rounded-full">
-                    <Globe2 className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">Global Perspective</h3>
-                    <p className="text-zinc-400 text-sm mt-1">With experience in diverse environments, I bring a global perspective to problem-solving.</p>
-                  </div>
-                </div>
+            {/* Global Perspective */}
+            <div
+              className="group flex-1 min-w-[260px] max-w-full rounded-xl backdrop-blur p-6 shadow-md border border-indigo-500 transition-all duration-300 cursor-pointer"
+              tabIndex={0}
+              aria-label="Global Perspective"
+            >
+              <div className="flex items-center gap-4 mb-2">
+                <span className="p-3 rounded-full border border-indigo-500 shadow-none">
+                  <Globe2 className="w-6 h-6 text-white" />
+                </span>
+                <h3 className="text-white font-semibold text-lg mb-0">Global Perspective</h3>
               </div>
-              <div className="p-6 bg-zinc-800 rounded-2xl shadow-md">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-indigo-500 rounded-full">
-                    <TerminalSquare className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">Code Quality</h3>
-                    <p className="text-zinc-400 text-sm mt-1">I adhere to the highest standards of code quality, ensuring maintainability and scalability.</p>
-                  </div>
-                </div>
+              <p className="text-slate-300 text-sm">With experience in diverse environments, I bring a global perspective to problem-solving.</p>
+            </div>
+            {/* Performance Obsessed */}
+            <div
+              className="group flex-1 min-w-[260px] max-w-full rounded-xl backdrop-blur p-6 shadow-md border border-indigo-500 transition-all duration-300 cursor-pointer"
+              tabIndex={0}
+              aria-label="Performance Obsessed"
+            >
+              <div className="flex items-center gap-4 mb-2">
+                <span className="p-3 rounded-full border border-indigo-500 shadow-none">
+                  <Bolt className="w-6 h-6 text-white" />
+                </span>
+                <h3 className="text-white font-semibold text-lg mb-0">Performance Obsessed</h3>
               </div>
+              <p className="text-slate-300 text-sm">I optimize for speed and efficiency, delivering top-notch performance.</p>
+            </div>
+            {/* Code Quality */}
+            <div
+              className="group flex-1 min-w-[260px] max-w-full rounded-xl backdrop-blur p-6 shadow-md border border-indigo-500 transition-all duration-300 cursor-pointer"
+              tabIndex={0}
+              aria-label="Code Quality"
+            >
+              <div className="flex items-center gap-4 mb-2">
+                <span className="p-3 rounded-full border border-indigo-500 shadow-none">
+                  <TerminalSquare className="w-6 h-6 text-white" />
+                </span>
+                <h3 className="text-white font-semibold text-lg mb-0">Code Quality</h3>
+              </div>
+              <p className="text-slate-300 text-sm">I adhere to the highest standards of code quality, ensuring maintainability and scalability.</p>
             </div>
           </div>
         </div>
@@ -231,55 +239,55 @@ export default function PortfolioClient({ blogPost }: { blogPost: BlogPost | nul
       </section>
 
       {/* Latest from my blog */}
-      {blogPost && (
-        <section id="latest-blog" className="border-t border-zinc-800">
-          <div className="mx-auto max-w-6xl px-4 py-16">
-            <SectionTitle kicker="Latest from my blog" title={blogPost.title} />
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-lg mt-4">
-              <div className="text-zinc-400 text-sm mb-2 font-mono">{blogPost.date}</div>
-              <div className="text-zinc-200 text-base font-mono mb-4">{blogPost.content.slice(0, Math.floor(blogPost.content.length / 7))}...</div>
-              <Link href={`/blog/${blogPost.slug}`} className="inline-block px-4 py-2 rounded-xl bg-indigo-500 text-white font-mono hover:bg-indigo-600 transition">Keep reading →</Link>
-            </div>
-            <div className="mt-8 text-right">
-              <Link href="/blog" className="text-indigo-400 hover:underline font-mono">See all posts →</Link>
-            </div>
+      <section id="latest-blog" className="border-t border-zinc-800">
+        <div className="mx-auto max-w-6xl px-4 py-16">
+          <SectionTitle kicker="Latest from my blog" title="Recent Posts" />
+          <ul className="list-disc pl-5 text-zinc-200 mt-4">
+            {Array.isArray(blogPost) && blogPost.map((post: BlogPost, index) => (
+              index < 3 && (
+                <li key={post.slug} className="text-lg font-mono mb-2">
+                  <Link href={`/blog/${post.slug}`} className="text-indigo-400 hover:underline">
+                    {post.title}
+                  </Link>
+                </li>
+              )
+            ))}
+          </ul>
+          <div className="mt-8 text-right">
+            <Link href="/blog" className="text-indigo-400 hover:underline font-mono">See all posts →</Link>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Contact */}
-      <section className="py-16 bg-slate-900">
-        <div className="mx-auto max-w-6xl px-4">
-          <SectionTitle kicker="Get in Touch" title="Contact Me" />
-          <div className="mt-8">
-            <p className="text-zinc-400 mb-4">I&apos;m always open to discussing new projects or opportunities. Feel free to reach out!</p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href="mailto:contact.giuseppe00@gmail.com"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-indigo-500 text-white font-medium shadow hover:bg-indigo-600 transition"
-              >
-                <Mail className="w-5 h-5" />
-                Email Me
-              </a>
-              <a
-                href="https://calendly.com/contact-giuseppe00/call"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-white font-medium shadow hover:bg-slate-700 transition"
-              >
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20"><path d="M3 8v4h4l5 5V3L7 8H3z"/></svg>
-                Book a Call
-              </a>
+      <section id="contact" className="border-t border-zinc-800 mt-16">
+        <div className="mx-auto max-w-6xl px-4 py-16">
+          <h2 className="font-mono text-indigo-400 text-lg mb-2">Get in touch</h2>
+          <h3 className="text-3xl md:text-4xl font-bold mb-4">Let&apos;s Build</h3>
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-800 p-6 mb-6">
+            <div className="flex items-center gap-3 text-zinc-300">
+              <span className="font-mono text-indigo-400">contact.giuseppe00@gmail.com</span>
+            </div>
+            <div className="flex items-center gap-3 mt-3 text-zinc-300">
+              <span className="text-indigo-400">Based in the UK • Working globally</span>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-800 p-6">
+            <p className="text-zinc-300 mb-4">
+              Got an idea or want to collaborate? Just send a quick message with what you&apos;re thinking—I&apos;m always happy to chat and help out. Let&apos;s make something cool together!
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <a href="mailto:contact.giuseppe00@gmail.com?subject=Hello" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-500 text-white font-medium shadow hover:bg-indigo-400 transition">Email me</a>
+              <Link href="/projects" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-700 bg-transparent text-zinc-100 hover:bg-zinc-900 transition">See Projects</Link>
             </div>
           </div>
         </div>
       </section>
-    {/* Removed duplicate and unclosed section tag */}
 
-      <footer className="border-t border-zinc-800 py-10 bg-zinc-900">
+      <footer className="border-t border-zinc-800 py-10">
         <div className="mx-auto max-w-6xl px-4 text-xs text-purple-400 flex items-center justify-between">
           <span>© {new Date().getFullYear()} Giuseppe Giona</span>
-                  <span className="font-mono">v1.2 &bull; built with React</span>
+          <span className="font-mono">v1.2 &bull; built with React</span>
         </div>
       </footer>
     </div>
