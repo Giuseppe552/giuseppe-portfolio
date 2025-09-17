@@ -1,6 +1,6 @@
 "use server";
-import matter from "gray-matter";
 import Link from "next/link";
+import matter from "gray-matter";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import ResponsiveHeader from "@/components/ResponsiveHeader";
