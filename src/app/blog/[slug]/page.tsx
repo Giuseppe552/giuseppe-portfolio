@@ -1,166 +1,179 @@
-"use server";
 import Link from "next/link";
 import matter from "gray-matter";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import ResponsiveHeader from "@/components/ResponsiveHeader";
-import BackgroundFX from "@/components/BackgroundFX";
+import Header from "@/components/Header";
+import Aurora from "@/components/Aurora";
 import SiteFooter from "@/components/SiteFooter";
 import { readBlogFile, listBlogSlugs } from "@/lib/safeFs";
+import { getBlogPostBySlug } from "@/lib/blogConfig";
+import { notFound } from "next/navigation";
 
-// --- ADD THESE IMPORTS for syntax highlighting ---
-import React from "react";
-import Prism from "prismjs";
-import "prismjs/components/prism-jsx";
-import "prismjs/components/prism-tsx";
-import "prismjs/components/prism-typescript";
-import "prismjs/components/prism-python";
-import "prismjs/components/prism-bash";
-import "prismjs/components/prism-json";
-import "prismjs/components/prism-markdown";
-import "@/../public/prism-one-dark.css";
-// ------------------------------------------------
-
-export async function generateStaticParams() {
-  return listBlogSlugs().map(slug => ({ slug }));
+// Define allowed parameters based on Next.js App Router
+interface BlogPageProps {
+  params: Promise<{ slug: string }>;
 }
 
-export default async function BlogPostPage(props: { params: Promise<{ slug: string }> }) {
-  const params = await props.params;
-  const raw = readBlogFile(params.slug);
+// Render a blog post (only for markdown posts now)
+export default async function BlogPage({ params }: BlogPageProps) {
+  const { slug } = await params;
+  
+  // Check if this slug exists in our blog config and if it's a markdown post
+  const blogConfig = getBlogPostBySlug(slug);
+  
+  // If it's not a markdown post, or doesn't exist, let Next.js handle it (404 or custom page.tsx)
+  if (!blogConfig || blogConfig.type !== 'markdown') {
+    notFound();
+  }
+  
+  const raw = readBlogFile(slug);
   const { data, content } = matter(raw);
-
-  const firstImageMatch = content.match(/\!\[.*?\]\((.*?)\)/);
-  const ogImage = firstImageMatch ? firstImageMatch[1] : "/og.png";
 
   return (
     <>
-      <head>
-        <title>{data.title}</title>
-        <meta name="description" content={data.description || "Blog post by Giuseppe Giona."} />
-        <meta property="og:title" content={data.title} />
-        <meta property="og:description" content={data.description || "Blog post by Giuseppe Giona."} />
-        <meta property="og:image" content={ogImage} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={`https://giuseppegiona.com/blog/${params.slug}`} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={data.title} />
-        <meta name="twitter:description" content={data.description || "Blog post by Giuseppe Giona."} />
-        <meta name="twitter:image" content={ogImage} />
-      </head>
-      <div
-        className="min-h-screen text-zinc-100 relative font-['JetBrains_Mono',monospace] cursor-pointer"
-      >
-        <ResponsiveHeader />
-        <BackgroundFX />
-        <main className="relative py-16">
-          <div className="mx-auto max-w-3xl px-4">
-            <Link href="/blog" className="text-indigo-400 underline mb-6 inline-block font-['JetBrains_Mono',monospace]">← Back to blog</Link>
-            <h1 className="text-2xl font-bold mb-4 font-['JetBrains_Mono',monospace]">{data.title}</h1>
-            <div className="border border-neutral-800 bg-zinc-900 rounded-2xl p-6 mb-24 shadow-lg font-['JetBrains_Mono',monospace]">
-              <div className="mb-4 text-lg text-zinc-200 font-['JetBrains_Mono',monospace]">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    p: (props) => (
-                      <p className="mb-5">
-                        {props.children}
-                      </p>
-                    ),
-                    h2: (props) => (
-                      <h2
-                        className="text-xl font-bold underline mb-6 mt-10 text-indigo-300 font-['JetBrains_Mono',monospace]"
-                        {...props}
-                      />
-                    ),
-                    hr: () => (
-                      <div className="my-8" />
-                    ),
-                    ul: (props) => (
-                      <ul className="list-disc pl-6 mb-6 font-['JetBrains_Mono',monospace]" {...props} />
-                    ),
-                    ol: (props) => (
-                      <ol className="list-decimal pl-6 mb-6 font-['JetBrains_Mono',monospace]" {...props} />
-                    ),
-                    li: (props) => (
-                      <li className="mb-2 font-['JetBrains_Mono',monospace]" {...props} />
-                    ),
-                    a: (props) => (
-                      <a
-                        {...props}
-                        className={
-                          (props.href === "https://github.com/Giuseppe552/ats-helper"
-                            ? "inline-block mt-6 px-6 py-2 rounded-xl bg-indigo-500 text-black font-semibold shadow hover:bg-indigo-400 transition text-base text-center"
-                            : "text-indigo-400 underline hover:text-indigo-300 transition") + " font-['JetBrains_Mono',monospace]"
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {props.children}
-                      </a>
-                    ),
-                    // --- NEW: Syntax-highlighted code blocks ---
-                    /**
-                     * Enterprise-grade security: Only allow whitelisted languages for Prism highlighting.
-                     * Uses strict allowedLangs as const, type guards, and a utility function for validation.
-                     * ESLint: security/detect-object-injection
-                     * See: https://owasp.org/www-community/vulnerabilities/Object_injection
-                     */
-                    // Fix: Type signature for ReactMarkdown code renderer must have optional children for compatibility
-                    code({ className, children, ...props }: { className?: string; children?: React.ReactNode }) {
-                      const match = /language-(\w+)/.exec(className || "");
-                      // Enterprise-grade security: strict whitelist and type guard for Prism languages
-                      // See: https://owasp.org/www-community/vulnerabilities/Object_injection
-                      // Fix: Use Array<string> for allowedPrismLanguages, not const assertion
-                      const allowedPrismLanguages: string[] = Object.keys(Prism.languages);
-                      function isAllowedLang(lang: string): boolean {
-                        return allowedPrismLanguages.includes(lang);
-                      }
-                      let html = "";
-                      if (match) {
-                        const lang = match[1];
-                        try {
-                          // Fix: Validate 'lang' against Prism.languages whitelist before dynamic access
-                          // Resolves ESLint: security/detect-object-injection
-                          if (isAllowedLang(lang)) {
-                            html = Prism.highlight(
-                              String(children),
-                              Prism.languages[lang as keyof typeof Prism.languages], // Safe: lang is guaranteed to be a valid key
-                              lang
-                            );
-                          } else {
-                            html = Prism.highlight(
-                              String(children),
-                              Prism.languages.javascript,
-                              "javascript"
-                            );
-                          }
-                        } catch {
-                          html = String(children);
-                        }
-                        return (
-                          <pre className={`prism-one-dark language-${lang}`}>
-                            <code
-                              className={`language-${lang}`}
-                              dangerouslySetInnerHTML={{ __html: html }}
-                            />
-                          </pre>
-                        );
-                      }
-                      return (
-                        <code
-                          className={className + " bg-[#222] px-2 py-1 rounded font-['JetBrains_Mono',monospace]"}
-                          {...props}
-                        >
-                          {children}
-                        </code>
-                      );
-                    },
-                    // -----------------------------------------
-                  }}
-                  
-                >{content}</ReactMarkdown>
+      <div className="min-h-screen text-zinc-100 relative">
+        <Header />
+        <Aurora />
+        
+        {/* Hero Section */}
+        <section className="relative pt-24 pb-20">
+          <div className="max-w-screen-2xl mx-auto px-6">
+            {/* Breadcrumb */}
+            <div className="mb-8">
+              <Link 
+                href="/blog" 
+                className="text-cyan-400 hover:text-cyan-300 transition-colors duration-200 font-mono text-sm inline-flex items-center gap-2"
+              >
+                ← Back to Blog
+              </Link>
+            </div>
+            
+            {/* Article Header */}
+            <div className="max-w-5xl">
+              <div className="flex flex-wrap gap-3 mb-8">
+                {data.tags?.map((tag: string) => (
+                  <span 
+                    key={tag}
+                    className="px-4 py-2 bg-gradient-to-r from-cyan-400/10 to-emerald-400/10 border border-cyan-400/20 text-cyan-400 rounded-full text-sm font-mono hover:bg-cyan-400/20 transition-colors"
+                  >
+                    #{tag}
+                  </span>
+                ))}
               </div>
+              
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 gradient-text leading-tight">
+                {data.title}
+              </h1>
+              
+              <div className="flex items-center gap-8 text-base text-zinc-400 font-mono mb-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full flex items-center justify-center">
+                    <span className="text-black font-bold">G</span>
+                  </div>
+                  <span className="text-white">Giuseppe Giona</span>
+                </div>
+                <span>•</span>
+                <span>{new Date(data.date).toLocaleDateString("en-US", { 
+                  year: "numeric", 
+                  month: "long", 
+                  day: "numeric" 
+                })}</span>
+                <span>•</span>
+                <span className="text-emerald-400 font-semibold">~{Math.ceil(content.split(' ').length / 200)} min read</span>
+              </div>
+              
+              {data.summary && (
+                <p className="text-2xl text-zinc-300 leading-relaxed mb-10 max-w-4xl font-light">
+                  {data.summary}
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Main Article Content */}
+        <main className="relative pb-24">
+          <div className="max-w-screen-2xl mx-auto px-6">
+            <div className="grid lg:grid-cols-5 gap-16">
+              
+              {/* Table of Contents Sidebar */}
+              <aside className="lg:col-span-1">
+                <div className="sticky top-24">
+                  <div className="glass rounded-xl p-6 mb-6">
+                    <h3 className="text-sm font-semibold text-emerald-400 mb-4 uppercase tracking-wide">
+                      In This Article
+                    </h3>
+                    <nav className="space-y-2 text-sm">
+                      <a href="#intro" className="block text-zinc-400 hover:text-cyan-400 transition-colors">
+                        Introduction
+                      </a>
+                      <a href="#setup" className="block text-zinc-400 hover:text-cyan-400 transition-colors">
+                        Setup & Configuration
+                      </a>
+                      <a href="#implementation" className="block text-zinc-400 hover:text-cyan-400 transition-colors">
+                        Implementation
+                      </a>
+                      <a href="#best-practices" className="block text-zinc-400 hover:text-cyan-400 transition-colors">
+                        Best Practices
+                      </a>
+                    </nav>
+                  </div>
+                  
+                  {/* Share & Actions */}
+                  <div className="glass rounded-xl p-6">
+                    <h3 className="text-sm font-semibold text-emerald-400 mb-4 uppercase tracking-wide">
+                      Share Article
+                    </h3>
+                    <div className="flex flex-col gap-2">
+                      <button className="flex items-center gap-2 text-sm text-zinc-400 hover:text-cyan-400 transition-colors">
+                        <span className="w-4 h-4">📄</span>
+                        Copy Link
+                      </button>
+                      <button className="flex items-center gap-2 text-sm text-zinc-400 hover:text-cyan-400 transition-colors">
+                        <span className="w-4 h-4">🐦</span>
+                        Share on X
+                      </button>
+                      <button className="flex items-center gap-2 text-sm text-zinc-400 hover:text-cyan-400 transition-colors">
+                        <span className="w-4 h-4">💼</span>
+                        Share on LinkedIn
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </aside>
+
+              {/* Article Content - Much Wider */}
+              <article className="lg:col-span-4">
+                <div className="glass rounded-2xl p-8 lg:p-16">
+                  <div className="prose prose-invert prose-zinc max-w-none prose-xl
+                    prose-headings:gradient-text 
+                    prose-headings:font-bold 
+                    prose-h1:text-5xl prose-h1:mb-10 prose-h1:mt-16 prose-h1:leading-tight
+                    prose-h2:text-4xl prose-h2:mb-8 prose-h2:mt-12 prose-h2:border-b prose-h2:border-white/10 prose-h2:pb-4
+                    prose-h3:text-3xl prose-h3:mb-6 prose-h3:mt-10 prose-h3:text-emerald-400
+                    prose-h4:text-2xl prose-h4:mb-4 prose-h4:mt-8 prose-h4:text-cyan-400
+                    prose-p:text-zinc-300 prose-p:leading-relaxed prose-p:mb-8 prose-p:text-lg
+                    prose-a:text-cyan-400 prose-a:no-underline hover:prose-a:text-cyan-300 prose-a:transition-colors
+                    prose-strong:text-emerald-400 prose-strong:font-semibold
+                    prose-em:text-cyan-300 prose-em:not-italic
+                    prose-code:text-emerald-300 prose-code:bg-emerald-400/10 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-base prose-code:font-mono
+                    prose-pre:bg-zinc-900/50 prose-pre:border prose-pre:border-white/10 prose-pre:rounded-xl prose-pre:p-6 prose-pre:overflow-hidden
+                    prose-blockquote:border-l-4 prose-blockquote:border-cyan-400 prose-blockquote:bg-cyan-400/5 prose-blockquote:p-6 prose-blockquote:rounded-r-lg prose-blockquote:my-8
+                    prose-blockquote:text-cyan-100 prose-blockquote:italic prose-blockquote:text-lg
+                    prose-ul:text-zinc-300 prose-ol:text-zinc-300 prose-ul:text-lg prose-ol:text-lg
+                    prose-li:mb-3 prose-li:text-zinc-300
+                    prose-img:rounded-xl prose-img:border prose-img:border-white/10 prose-img:shadow-2xl prose-img:my-10
+                    prose-hr:border-white/10 prose-hr:my-16
+                    prose-table:border-collapse prose-table:border prose-table:border-white/10 prose-table:rounded-lg prose-table:overflow-hidden prose-table:my-8
+                    prose-th:bg-white/5 prose-th:text-emerald-400 prose-th:font-semibold prose-th:p-4 prose-th:border prose-th:border-white/10 prose-th:text-base
+                    prose-td:p-4 prose-td:border prose-td:border-white/10 prose-td:text-zinc-300 prose-td:text-base"
+                  >
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {content}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              </article>
             </div>
           </div>
         </main>
@@ -168,4 +181,10 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
       </div>
     </>
   );
+}
+
+// Generate static params for all blog posts
+export async function generateStaticParams() {
+  const slugs = listBlogSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
